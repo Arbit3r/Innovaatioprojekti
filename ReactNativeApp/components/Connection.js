@@ -77,6 +77,7 @@ export default class Connection {
       const candidate = {
         type: 'candidate',
         roomCode: this.roomCode,
+        isRoom: this.isRoom,
         candidate: event.candidate,
       };
       this.ws.send(JSON.stringify(candidate));
@@ -191,6 +192,7 @@ export default class Connection {
             const answer = {
               type: 'answer',
               roomCode: this.roomCode,
+              isRoom: this.isRoom,
               description: this.peerConnection.localDescription,
             };
             this.ws.send(JSON.stringify(answer));
