@@ -7,6 +7,9 @@ import {
 } from 'react-native-webrtc';
 
 export default class Connection {
+  roomCode;
+  isRoom;
+
   mediaConstraints = {
     audio: true,
     video: {
@@ -31,10 +34,13 @@ export default class Connection {
 
   ws = new WebSocket('wss://echo.websocket.org'); // Signaling server address goes here
 
-  constructor(roomCode, isUser) {
+  constructor(roomCode, isRoom) {
+    this.roomCode = roomCode;
+    this.isRoom = isRoom;
+    this.initWebSocket();
     this.initLocalMediaStream().then(r => this.initPeerConnection());
-    this.initWebSocket(roomCode, isUser);
   }
+
   async initLocalMediaStream() {
     try {
       const mediaStream = await mediaDevices.getUserMedia(
@@ -55,6 +61,7 @@ export default class Connection {
       switch (this.peerConnection.connectionState) {
         case 'closed':
           // You can handle the call being disconnected here.
+          console.log('Connection state: closed');
           break;
       }
     });
@@ -69,6 +76,7 @@ export default class Connection {
       // Keeping to Trickle ICE Standards, you should send the candidates immediately.
       const candidate = {
         type: 'candidate',
+        roomCode: this.roomCode,
         candidate: event.candidate,
       };
       this.ws.send(JSON.stringify(candidate));
@@ -77,14 +85,17 @@ export default class Connection {
     this.peerConnection.addEventListener('icecandidateerror', event => {
       // You can ignore some candidate errors.
       // Connections can still be made even when errors occur.
+      console.log('ICE candidate error');
     });
 
     this.peerConnection.addEventListener('iceconnectionstatechange', event => {
       switch (this.peerConnection.iceConnectionState) {
         case 'connected':
+          console.log('ICE connection state: connected');
         case 'completed':
           // You can handle the call being connected here.
           // Like setting the video streams to visible.
+          console.log('ICE connection state: completed');
           break;
       }
     });
@@ -92,6 +103,10 @@ export default class Connection {
     this.peerConnection.addEventListener('negotiationneeded', async event => {
       // You can start the offer stages here.
       // Be careful as this event can be called multiple times.
+      if (this.isRoom) {
+        return;
+      }
+
       if (this.makingOffer === true) {
         return;
       }
@@ -115,6 +130,8 @@ export default class Connection {
 
         const offer = {
           type: 'offer',
+          roomCode: this.roomCode,
+          isRoom: this.isRoom,
           description: this.peerConnection.localDescription,
         };
         this.ws.send(JSON.stringify(offer));
@@ -147,11 +164,12 @@ export default class Connection {
       );
   }
 
-  initWebSocket(roomCode, isUser) {
+  initWebSocket() {
     this.ws.onopen = () => {
       const request = {
-        roomCode: roomCode,
-        isUser: isUser, // Boolean that specifies if the request is coming from a user or a room
+        type: 'register',
+        roomCode: this.roomCode,
+        isRoom: this.isRoom,
       };
       this.ws.send(JSON.stringify(request));
     };
@@ -172,6 +190,7 @@ export default class Connection {
 
             const answer = {
               type: 'answer',
+              roomCode: this.roomCode,
               description: this.peerConnection.localDescription,
             };
             this.ws.send(JSON.stringify(answer));
@@ -201,11 +220,11 @@ export default class Connection {
     };
 
     this.ws.onerror = error => {
-      console.log('Error:', error.message);
+      console.log('WebSocket error:', error.message);
     };
 
     this.ws.onclose = event => {
-      console.log('Connection closed');
+      console.log('WebSocket connection closed');
       console.log('Code:', event.code);
       console.log('Reason:', event.reason);
     };
