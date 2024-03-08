@@ -1,57 +1,65 @@
-import { View,Text, TouchableWithoutFeedback } from "react-native"
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  useColorScheme,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 
-
-const Main = ({route}) => {
+const Main = () => {
     const navigation = useNavigation();
-    const {roomNumber} = route.params;
+    const [userData, setUserData] = useState({});
+
+    useEffect(() => {
+        const fetchDataFromStorage = async () => {
+            try {
+                const data = await AsyncStorage.getItem('@userData');
+                if (data !== null) {
+                    setUserData(JSON.parse(data));
+                }
+            } catch (error) {
+                console.error('Error fetching data from storage:', error);
+            }
+        };
+
+        fetchDataFromStorage();
+    }, []);
 
     return ( 
         <View>
-          <View style={styles.container}>
-        <TouchableWithoutFeedback onLongPress ={() => {
-            navigation.replace('RoomNumber')
-        }}>
-        <Text style={styles.screenTitle}>Benete</Text>
-      </TouchableWithoutFeedback>
-      <Text style={styles.screenTitle}>{roomNumber}</Text>
-      </View>
+            <View style={styles.container}>
+                <TouchableWithoutFeedback onLongPress={() => navigation.replace('RoomNumber')}>
+                    <Text style={styles.screenTitle}>Benete</Text>
+                </TouchableWithoutFeedback>
+                <Text style={styles.screenTitle}>{userData.roomNumber}</Text>
+            </View>
 
-      <View style={styles.content}>
-          <Text>Kaikki kunnossa!</Text>
+            <Text style={styles.roleText}>{userData.role}</Text>
+
+            <View style={styles.content}>
+                <Text>Kaikki kunnossa!</Text>
+            </View>
         </View>
-      </View>
-    )
+    );
 }
+
 const styles = StyleSheet.create({
     screenTitle: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      
-  },
-  content: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 300,
-  },
-
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    margin: 5
-  }
-  
-  });
-  
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    roleText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    content: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 300,
+    },
+    container: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        margin: 5,
+    },
+});
 
 export default Main;
