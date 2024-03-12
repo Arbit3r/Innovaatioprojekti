@@ -1,6 +1,6 @@
 const { WebSocketServer } = require('ws');
 
-const wss = new WebSocketServer({ port: 6969 });
+const wss = new WebSocketServer({ port: 8080 });
 
 let room = [];
 let nurse = [];

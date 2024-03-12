@@ -32,7 +32,7 @@ export default class Connection {
   peerConnection = new RTCPeerConnection(this.peerConstraints);
   makingOffer = false;
 
-  ws = new WebSocket('ws://10.0.2.2:6969'); // Signaling server address goes here
+  ws = new WebSocket('ws://10.0.2.2:8080'); // Signaling server address goes here
 
   constructor(roomCode, isRoom) {
     this.roomCode = roomCode;
