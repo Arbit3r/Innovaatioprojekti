@@ -1,12 +1,5 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useEffect, useState } from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -16,68 +9,108 @@ import {
   useColorScheme,
   View,
   TouchableOpacity,
+  Modal,
+  Button,
+  Linking,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 import RoomNumber from './screens/RoomNumber';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Main from "./screens/Main"
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
-
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const [deepLinkData, setDeepLinkData] = useState<string | null>(null);
+  const [initialRouteName, setInitialRouteName] = useState('Main');
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  useEffect(() => {
+    const checkStoredData = async () => {
+      try {
+        const roomNumber = await AsyncStorage.getItem('@roomNumber');
+        const role = await AsyncStorage.getItem('@role');
+        if (!roomNumber || !role) {
+          setInitialRouteName('RoomNumber');
+        }
+      } catch (error) {
+        console.error('Error checking stored data:', error);
+      }
+    };
+
+    checkStoredData();
+
+    const handleDeepLink = (event: { url: string }) => {
+      const deepLink = event.url;
+      const data = deepLink.split('?')[1].split('=')[1];
+      const decodedData = decodeURIComponent(data);
+      console.log('Received data:', decodedData);
+      setDeepLinkData(decodedData);
+    };
+
+    const handleInitialDeepLink = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) {
+        handleDeepLink({ url: initialUrl });
+      }
+    };
+
+    Linking.addEventListener('url', handleDeepLink);
+
+    handleInitialDeepLink();
+
+    return () => {
+      Linking.removeEventListener('url', handleDeepLink);
+    };
+  }, []);
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="RoomNumber">
+      <Stack.Navigator initialRouteName={initialRouteName}>
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="RoomNumber" component={RoomNumber} />
       </Stack.Navigator>
+      <Modal
+        visible={!!deepLinkData} 
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setDeepLinkData(null)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Received data: {deepLinkData}</Text>
+            <Button title="Close" onPress={() => setDeepLinkData(null)} />
+          </View>
+        </View>
+      </Modal>
     </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  content: {
+  modalContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 300,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  screenTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-},
-
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
 });
 
 export default App;
