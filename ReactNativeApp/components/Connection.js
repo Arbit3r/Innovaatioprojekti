@@ -77,7 +77,7 @@ export default class Connection {
       const candidate = {
         type: 'candidate',
         roomCode: this.roomCode,
-        isRoom: this.isRoom,
+        isRoom: !this.isRoom,
         candidate: event.candidate,
       };
       this.ws.send(JSON.stringify(candidate));
@@ -132,7 +132,7 @@ export default class Connection {
         const offer = {
           type: 'offer',
           roomCode: this.roomCode,
-          isRoom: this.isRoom,
+          isRoom: !this.isRoom,
           description: this.peerConnection.localDescription,
         };
         this.ws.send(JSON.stringify(offer));
@@ -192,7 +192,7 @@ export default class Connection {
             const answer = {
               type: 'answer',
               roomCode: this.roomCode,
-              isRoom: this.isRoom,
+              isRoom: !this.isRoom,
               description: this.peerConnection.localDescription,
             };
             this.ws.send(JSON.stringify(answer));
