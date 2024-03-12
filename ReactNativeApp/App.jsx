@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -23,9 +22,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
-function App(): React.JSX.Element {
+function App() {
   const isDarkMode = useColorScheme() === 'dark';
-  const [deepLinkData, setDeepLinkData] = useState<string | null>(null);
+  const [deepLinkData, setDeepLinkData] = useState(null);
   const [initialRouteName, setInitialRouteName] = useState('Main');
 
   const backgroundStyle = {
@@ -47,7 +46,7 @@ function App(): React.JSX.Element {
 
     checkStoredData();
 
-    const handleDeepLink = (event: { url: string }) => {
+    const handleDeepLink = (event) => {
       const deepLink = event.url;
       const data = deepLink.split('?')[1].split('=')[1];
       const decodedData = decodeURIComponent(data);
