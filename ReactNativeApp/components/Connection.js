@@ -32,7 +32,7 @@ export default class Connection {
   peerConnection = new RTCPeerConnection(this.peerConstraints);
   makingOffer = false;
 
-  ws = new WebSocket('wss://echo.websocket.org'); // Signaling server address goes here
+  ws = new WebSocket('ws://10.0.2.2:6969'); // Signaling server address goes here
 
   constructor(roomCode, isRoom) {
     this.roomCode = roomCode;
@@ -173,11 +173,15 @@ export default class Connection {
         isRoom: this.isRoom,
       };
       this.ws.send(JSON.stringify(request));
+      console.log('register request sent');
     };
 
     this.ws.onmessage = async message => {
+      message = JSON.parse(message.data);
+
       switch (message.type) {
         case 'offer':
+          console.log('Offer received');
           try {
             const offerDescription = new RTCSessionDescription(
               message.description,
@@ -196,12 +200,15 @@ export default class Connection {
               description: this.peerConnection.localDescription,
             };
             this.ws.send(JSON.stringify(answer));
+            console.log('Answer sent');
           } catch (e) {
             console.log('Failed to process offer:' + e);
           }
           break;
 
         case 'answer':
+          console.log('Answer received');
+          console.log('isRoom: ' + this.isRoom);
           try {
             const answerDescription = new RTCSessionDescription(
               message.description,

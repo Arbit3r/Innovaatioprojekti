@@ -1,6 +1,6 @@
 const { WebSocketServer } = require('ws');
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 6969 });
 
 let room = [];
 let nurse = [];
@@ -79,13 +79,15 @@ wss.on('connection', ws => {
 
                     console.log(json.roomCode + " Is not included!");
 
-                    if(json.isRoom === "true"){
+                    json2 = json.isRoom && JSON.parse(json.isRoom); // Tee paremmin
+
+                    if(json2 === true){
                         console.log("Pushing " + json.roomCode + " to room array!")
                         room.push({
                             roomCode: json.roomCode,
                             webSocket: ws
                         });
-                    } else if(json.isRoom === "false"){
+                    } else if(json2 === false){
                         console.log("Pushing " + json.roomCode + " to nurse array!")
                         nurse.push({
                             roomCode: json.roomCode,
