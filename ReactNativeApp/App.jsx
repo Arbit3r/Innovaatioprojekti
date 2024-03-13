@@ -72,7 +72,7 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={initialRouteName}>
+      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{headerShown: false}}>
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="RoomNumber" component={RoomNumber} />
       </Stack.Navigator>

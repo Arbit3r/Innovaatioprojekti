@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ToastAndroid } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -17,6 +17,16 @@ const RoomNumber = ({}) => {
             console.error('Error saving data to memory:', error);
         }
     };
+
+     //Check if input empty, otherwise continue
+     const handleInput = () => {
+        if (roomNumber === "" && role === "Asukas") {
+            ToastAndroid.show("Huonetunnus ei saa olla tyhjä!", ToastAndroid.SHORT);
+        } else {
+            saveDataToMemory();
+            navigation.replace('Main', { roomNumber, role });
+        }
+      }
 
     return ( 
         <View>
@@ -39,8 +49,7 @@ const RoomNumber = ({}) => {
 
             <Button 
                 onPress={() => {
-                    saveDataToMemory();
-                    navigation.replace('Main', { roomNumber, role });
+                    handleInput();
                 }}
                 title="Valmis"
             />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 
@@ -25,9 +25,11 @@ const Main = () => {
     return ( 
         <View>
             <View style={styles.container}>
-                <TouchableWithoutFeedback onLongPress={() => navigation.replace('RoomNumber')}>
-                    <Text style={styles.screenTitle}>Benete</Text>
-                </TouchableWithoutFeedback>
+            <Pressable delayLongPress={3000} onLongPress={() => {
+            navigation.navigate('RoomNumber')
+        }}>
+          <Image source={require("../assets/Benete-blue.png")} />
+        </Pressable>
                 <Text style={styles.screenTitle}>{userData.roomNumber}</Text>
             </View>
 
@@ -58,7 +60,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        margin: 5,
+        margin: 7,
     },
 });
 
