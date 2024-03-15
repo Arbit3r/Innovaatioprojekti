@@ -6,5 +6,6 @@
     "resident": "Resident",
     "nurse": "Nurse",
     "ready_button_title": "Ready",
-    "select_language_label": "Select Language"
+    "select_language_label": "Select Language",
+    "room_number_empty": "Room number cannot be empty!"
 }
