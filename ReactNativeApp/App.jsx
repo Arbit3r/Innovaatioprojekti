@@ -18,14 +18,37 @@ import RoomNumber from './screens/RoomNumber';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Main from "./screens/Main"
+import Placeholder from "./screens/Placeholder"
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import i18next from './services/i18next';
 const Stack = createNativeStackNavigator();
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [deepLinkData, setDeepLinkData] = useState(null);
-  const [initialRouteName, setInitialRouteName] = useState('Main');
+  const [initialRouteName, setInitialRouteName] = useState(null); 
+
+  const LanguageProvider = ({ children }) => {
+    useEffect(() => {
+      const loadLanguagePreference = async () => {
+        try {
+          const language = await AsyncStorage.getItem('@language');
+          if (language) {
+            i18next.changeLanguage(language);
+          }
+          else {
+            i18next.changeLanguage('en');
+          }
+        } catch (error) {
+          console.error('Error loading language preference:', error);
+        }
+      };
+  
+      loadLanguagePreference();
+    }, []);
+  
+    return <>{children}</>;
+  };
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -34,16 +57,30 @@ function App() {
   useEffect(() => {
     const checkStoredData = async () => {
       try {
-        const roomNumber = await AsyncStorage.getItem('@roomNumber');
-        const role = await AsyncStorage.getItem('@role');
-        if (!roomNumber || !role) {
+        const data = await AsyncStorage.getItem('@userData');
+        console.log('Stored data:', data);
+        if (!data) {
           setInitialRouteName('RoomNumber');
+          return;
         }
+        const { roomNumber, role } = JSON.parse(data) || {};
+        if (!roomNumber?.trim() || !role?.trim()) {
+          setInitialRouteName('RoomNumber');
+          return;
+        }
+        if (role !== 'Resident' && role !== 'Nurse') {
+          setInitialRouteName('RoomNumber');
+          return;
+        }
+        console.log('Room number:', roomNumber);
+        console.log('Role:', role);
+        setInitialRouteName(role === 'Resident' ? 'Main' : 'Placeholder');
+        console.log('Initial route:', initialRouteName);
       } catch (error) {
         console.error('Error checking stored data:', error);
       }
     };
-
+    
     checkStoredData();
 
     const handleDeepLink = (event) => {
@@ -66,15 +103,20 @@ function App() {
     handleInitialDeepLink();
 
     return () => {
-      Linking.removeEventListener('url', handleDeepLink);
     };
-  }, []);
+  }, [initialRouteName]);
+
+  if (initialRouteName === null) {
+    return null;
+  }
 
   return (
+    <LanguageProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{headerShown: false}}>
-        <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="RoomNumber" component={RoomNumber} />
+        <Stack.Screen name="Main" component={Main} />
+        <Stack.Screen name="Placeholder" component={Placeholder} />
       </Stack.Navigator>
       <Modal
         visible={!!deepLinkData} 
@@ -90,6 +132,7 @@ function App() {
         </View>
       </Modal>
     </NavigationContainer>
+    </LanguageProvider>
   );
 }
 
