@@ -7,11 +7,12 @@ import {
   RTCSessionDescription,
   RTCView,
 } from 'react-native-webrtc';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, Button} from 'react-native';
 
 const Connection = ({ roomCode, isRoom }) => {
   const [localMediaStream, setLocalMediaStream] = useState(null);
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
+
   let mediaConstraints = {
     audio: true,
     video: {
@@ -28,7 +29,7 @@ const Connection = ({ roomCode, isRoom }) => {
     ]
   }
 
-  const peerConnection = useRef(new RTCPeerConnection(peerConstraints)).current;
+  let peerConnection = useRef(new RTCPeerConnection(peerConstraints)).current;
   let isVoiceOnly = false;
   let remoteCandidates = useRef([]).current;
   let tracks = useRef([]).current;
@@ -46,15 +47,7 @@ const Connection = ({ roomCode, isRoom }) => {
   }, [localMediaStream])
 
   useEffect(() => {
-    if (!remoteMediaStream) {
-      console.log('remoteMediaStream is null');
-      return;
-    }
-
-    if (tracks.length < 1) {
-      console.log('No tracks in array');
-      return;
-    }
+    if (!remoteMediaStream || tracks.length < 1) return;
 
     tracks.map(track =>
       remoteMediaStream.addTrack(track, remoteMediaStream),
@@ -62,11 +55,11 @@ const Connection = ({ roomCode, isRoom }) => {
     console.log('Tracks added to remoteMediaStream, isRoom: ' + isRoom);
 
     tracks = [];
-
-    remoteMediaStream.getTracks().forEach(track =>
-      console.log(track),
-    );
   }, [remoteMediaStream])
+
+  function closePeerConnection() {
+    peerConnection.close();
+  }
 
   async function initLocalMediaStream() {
     try {
@@ -76,7 +69,6 @@ const Connection = ({ roomCode, isRoom }) => {
         videoTrack.enabled = false;
       }
       setLocalMediaStream(mediaStream);
-      console.log('localMediaStream initialized');
     } catch (e) {
       console.log(e);
     }
@@ -85,22 +77,28 @@ const Connection = ({ roomCode, isRoom }) => {
   function initPeerConnection() {
     peerConnection.addEventListener('connectionstatechange', event => {
       console.log('Connection state changed: ' + peerConnection.connectionState + ', isRoom: ' + isRoom);
-      switch (peerConnection.connectionState) {
-        case 'closed':
-          // You can handle the call being disconnected here.
-          console.log('Connection state: closed');
-          break;
+      if (peerConnection.connectionState === 'closed' ||
+          peerConnection.connectionState === 'disconnected' ||
+          peerConnection.connectionState === 'failed') {
+        if (!isRoom) return;
+
+        peerConnection = new RTCPeerConnection(peerConstraints);
+        initPeerConnection();
+
+        const message = {
+          type: 'callEnded',
+          roomCode: roomCode,
+        }
+        ws.send(JSON.stringify(message));
       }
     });
 
     peerConnection.addEventListener('icecandidate', event => {
-      // When you find a null candidate then there are no more candidates.
+      // When a null candidate is found, there are no more candidates.
       // Gathering of candidates has finished.
-      if (!event.candidate) {
-        return;
-      }
-      // Send the event.candidate onto the person you're calling.
-      // Keeping to Trickle ICE Standards, you should send the candidates immediately.
+      if (!event.candidate) return;
+
+      // Keeping to Trickle ICE Standards, the candidates are sent immediately.
       const candidate = {
         type: 'candidate',
         roomCode: roomCode,
@@ -112,8 +110,6 @@ const Connection = ({ roomCode, isRoom }) => {
     });
 
     peerConnection.addEventListener('icecandidateerror', event => {
-      // You can ignore some candidate errors.
-      // Connections can still be made even when errors occur.
       console.log('ICE candidate error');
     });
 
@@ -121,54 +117,17 @@ const Connection = ({ roomCode, isRoom }) => {
       switch (peerConnection.iceConnectionState) {
         case 'connected':
           console.log('ICE connection state: connected');
+          break;
         case 'completed':
-          // You can handle the call being connected here.
-          // Like setting the video streams to visible.
           console.log('ICE connection state: completed');
+          if (!isRoom) ws.close(1000, 'Connected to room');
           break;
       }
     });
 
     peerConnection.addEventListener('negotiationneeded', async event => {
-      // You can start the offer stages here.
-      // Be careful as this event can be called multiple times.
-      if (isRoom) {
-        return;
-      }
-
-      if (makingOffer) {
-        console.log('Tried to send offer twice');
-        return;
-      }
-
-      try {
-        makingOffer = true;
-
-        let sessionConstraints = {
-          mandatory: {
-            OfferToReceiveAudio: true,
-            OfferToReceiveVideo: true,
-            VoiceActivityDetection: true,
-          },
-        };
-
-        const offerDescription = await peerConnection.createOffer(sessionConstraints);
-
-        await peerConnection.setLocalDescription(offerDescription);
-
-        const offer = {
-          type: 'offer',
-          roomCode: roomCode,
-          isRoom: !isRoom,
-          description: peerConnection.localDescription,
-        };
-        ws.send(JSON.stringify(offer));
-        console.log('offer sent, isRoom: ' + isRoom);
-      } catch (e) {
-        console.log('Error at "negotiationneeded":' + e);
-      } finally {
-        makingOffer = false;
-      }
+      if (isRoom) return;
+      await sendOffer();
     });
 
     peerConnection.addEventListener('signalingstatechange', event => {
@@ -185,7 +144,7 @@ const Connection = ({ roomCode, isRoom }) => {
       setRemoteMediaStream(remoteMediaStream || new MediaStream());
       if (!remoteMediaStream) {
         console.log('Track added to array');
-        tracks.push(event.track);
+        tracks.push(event.track); // If the remote stream was null, these tracks will be added later.
       } else {
         console.log('Tracks added to remoteMediaStream, isRoom: ' + isRoom);
         remoteMediaStream.addTrack(event.track, remoteMediaStream);
@@ -271,6 +230,41 @@ const Connection = ({ roomCode, isRoom }) => {
     };
   }
 
+  async function sendOffer() {
+    if (makingOffer) {
+      return;
+    }
+
+    try {
+      makingOffer = true;
+
+      let sessionConstraints = {
+        mandatory: {
+          OfferToReceiveAudio: true,
+          OfferToReceiveVideo: true,
+          VoiceActivityDetection: true,
+        },
+      };
+
+      const offerDescription = await peerConnection.createOffer(sessionConstraints);
+      await peerConnection.setLocalDescription(offerDescription);
+
+      const offer = {
+        type: 'offer',
+        roomCode: roomCode,
+        isRoom: !isRoom,
+        description: peerConnection.localDescription,
+      };
+
+      ws.send(JSON.stringify(offer));
+      console.log('offer sent, isRoom: ' + isRoom);
+    } catch (e) {
+      console.log('Error while sending offer:' + e);
+    } finally {
+      makingOffer = false;
+    }
+  }
+
   function handleRemoteCandidate(iceCandidate) {
     iceCandidate = new RTCIceCandidate(iceCandidate);
 
@@ -297,9 +291,9 @@ const Connection = ({ roomCode, isRoom }) => {
   return (
       <View style={styles.body}>
         {
-          localMediaStream &&
+          remoteMediaStream &&
           <RTCView
-            streamURL={localMediaStream.toURL()}
+            streamURL={remoteMediaStream.toURL()}
             style={styles.stream} />
         }
       </View>
