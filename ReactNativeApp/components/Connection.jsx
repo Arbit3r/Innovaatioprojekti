@@ -14,7 +14,7 @@ import {StyleSheet, Text, View} from "react-native";
 const Connection = ({ roomCode, isRoom }) => {
   const localMediaStream = useMediaStream();
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
-  let tempMediaStream = useRef(new MediaStream()).current;
+  let remoteMediaStreamBuffer = useRef(new MediaStream()).current;
 
   let peerConstraints = {
     iceServers: [
@@ -34,21 +34,6 @@ const Connection = ({ roomCode, isRoom }) => {
     if (!localMediaStream) return;
     setupPeerConnection();
   }, [localMediaStream])
-
-  useEffect(() => {
-    if (!remoteMediaStream || tracks.length < 1) return;
-
-    tracks.forEach((track) => {
-      tempMediaStream.addTrack(track, tempMediaStream);
-      console.log(track.kind + ' track added to remoteMediaStream from array, isRoom: ' + isRoom);
-    });
-
-    if (tempMediaStream.getTracks().length === 2) {
-      setRemoteMediaStream(tempMediaStream);
-    }
-
-    tracks = [];
-  }, [remoteMediaStream])
 
   function closePeerConnection() {
     peerConnection.close();
@@ -121,16 +106,10 @@ const Connection = ({ roomCode, isRoom }) => {
 
     peerConnection.addEventListener('track', event => {
       // Grab the remote track from the connected participant.
-      setRemoteMediaStream(remoteMediaStream || new MediaStream());
-      if (!remoteMediaStream) {
-        console.log(event.track.kind + ' track added to array, isRoom: ' + isRoom);
-        tracks.push(event.track); // If the remote stream was null, these tracks will be added later.
-      } else {
-        console.log(event.track.kind + ' track added to remoteMediaStream directly, isRoom: ' + isRoom);
-        tempMediaStream.addTrack(event.track, tempMediaStream);
-        if (tempMediaStream.getTracks().length === 2) {
-          setRemoteMediaStream(tempMediaStream);
-        }
+      remoteMediaStreamBuffer.addTrack(event.track);
+      console.log('Tracks:' + remoteMediaStreamBuffer.getTracks().length);
+      if (remoteMediaStreamBuffer.getTracks().length === 2) {
+        setRemoteMediaStream(remoteMediaStreamBuffer);
       }
     });
 
@@ -177,14 +156,5 @@ const Connection = ({ roomCode, isRoom }) => {
 
   return remoteMediaStream;
 }
-
-const styles = StyleSheet.create({
-  body: {
-    flex: 1
-  },
-  stream: {
-    flex: 1
-  },
-});
 
 export default Connection;
