@@ -8,11 +8,13 @@ import {
   RTCView,
 } from 'react-native-webrtc';
 import useSignalingServer from './useSignalingServer';
-import useMediaStream from './useMediaStream'
+import useMediaStream from './useMediaStream';
+import {StyleSheet, Text, View} from "react-native";
 
 const Connection = ({ roomCode, isRoom }) => {
   const localMediaStream = useMediaStream();
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
+  let tempMediaStream = useRef(new MediaStream()).current;
 
   let peerConstraints = {
     iceServers: [
@@ -34,21 +36,18 @@ const Connection = ({ roomCode, isRoom }) => {
   }, [localMediaStream])
 
   useEffect(() => {
-    if (!remoteMediaStream || tracks.length < 1 || addingTrack) return;
-    addingTrack = true;
+    if (!remoteMediaStream || tracks.length < 1) return;
 
     tracks.forEach((track) => {
-      remoteMediaStream.addTrack(track, remoteMediaStream);
+      tempMediaStream.addTrack(track, tempMediaStream);
       console.log(track.kind + ' track added to remoteMediaStream from array, isRoom: ' + isRoom);
     });
 
-    /*tracks.map(track =>
-      remoteMediaStream.addTrack(track, remoteMediaStream),
-    );*/
+    if (tempMediaStream.getTracks().length === 2) {
+      setRemoteMediaStream(tempMediaStream);
+    }
 
     tracks = [];
-    console.log(tracks.length + ' tracks in array, isRoom: ' + isRoom);
-    addingTrack = false;
   }, [remoteMediaStream])
 
   function closePeerConnection() {
@@ -128,14 +127,17 @@ const Connection = ({ roomCode, isRoom }) => {
         tracks.push(event.track); // If the remote stream was null, these tracks will be added later.
       } else {
         console.log(event.track.kind + ' track added to remoteMediaStream directly, isRoom: ' + isRoom);
-        remoteMediaStream.addTrack(event.track, remoteMediaStream);
+        tempMediaStream.addTrack(event.track, tempMediaStream);
+        if (tempMediaStream.getTracks().length === 2) {
+          setRemoteMediaStream(tempMediaStream);
+        }
       }
     });
 
     // Add our stream to the peer connection.
     localMediaStream.getTracks().forEach(track =>
         peerConnection.addTrack( track, localMediaStream )
-      );
+    );
   }
 
   async function sendOffer() {
@@ -175,5 +177,14 @@ const Connection = ({ roomCode, isRoom }) => {
 
   return remoteMediaStream;
 }
+
+const styles = StyleSheet.create({
+  body: {
+    flex: 1
+  },
+  stream: {
+    flex: 1
+  },
+});
 
 export default Connection;
