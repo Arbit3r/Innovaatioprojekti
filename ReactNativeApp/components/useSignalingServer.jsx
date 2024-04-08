@@ -1,8 +1,9 @@
 import {useRef} from "react";
 import { RTCSessionDescription, RTCIceCandidate } from "react-native-webrtc";
+import WebSocket from 'ws';
 
-const useSignalingServer = ({roomCode, isRoom, peerConnection}) => {
-  const ws = useRef(new WebSocket('ws://10.0.2.2:8080')).current;
+const useSignalingServer = ({serverAddress, roomCode, isRoom, peerConnection}) => {
+  const ws = useRef(new WebSocket(serverAddress)).current;
   let remoteCandidates = useRef([]).current;
 
   ws.onopen = () => {

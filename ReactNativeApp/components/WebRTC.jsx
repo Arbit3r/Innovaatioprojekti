@@ -1,7 +1,6 @@
 import Connection from './Connection'
 import {StyleSheet, View} from "react-native";
 import {RTCView} from "react-native-webrtc";
-import {useEffect} from "react";
 
 const WebRTC = ({ roomCode, isRoom }) => {
   let remoteMediaStream = Connection({ roomCode, isRoom } );
