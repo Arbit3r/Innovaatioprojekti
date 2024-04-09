@@ -1,0 +1,11 @@
+{
+    "everything_is_okay": "Kaikki kunnossa!",
+    "screen_title": "Aseta huonetunnus",
+    "room_number_placeholder": "Huonetunnus",
+    "select_role_label": "Valitse rooli",
+    "resident": "Asukas",
+    "nurse": "Hoitaja",
+    "ready_button_title": "Valmis",
+    "select_language_label": "Valitse kieli",
+    "room_number_empty": "Huonetunnus ei voi olla tyhjä!"
+}

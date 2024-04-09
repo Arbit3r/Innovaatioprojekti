@@ -1,0 +1,11 @@
+{
+    "everything_is_okay": "Everything is okay!",
+    "screen_title": "Set Room Number",
+    "room_number_placeholder": "Room Number",
+    "select_role_label": "Select Role",
+    "resident": "Resident",
+    "nurse": "Nurse",
+    "ready_button_title": "Ready",
+    "select_language_label": "Select Language",
+    "room_number_empty": "Room number cannot be empty!"
+}
