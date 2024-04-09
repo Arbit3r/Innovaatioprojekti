@@ -1,12 +1,59 @@
-import {useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import { RTCSessionDescription, RTCIceCandidate } from "react-native-webrtc";
-import WebSocket from 'ws';
 
-const useSignalingServer = ({serverAddress, roomCode, isRoom, peerConnection}) => {
-  const ws = useRef(new WebSocket(serverAddress)).current;
+const useSignalingServer = (isRoom) => {
+  const [roomCode, setRoomCode] = useState(null);
+  const [ws, setWs] = useState(null);
+  const [peerConnection, setPeerConnection] = useState(null);
   let remoteCandidates = useRef([]).current;
 
-  ws.onopen = () => {
+  function setupSignalingServer(serverAddress, _peerConnection, _roomCode) {
+    setWs(new WebSocket(serverAddress));
+    setPeerConnection(_peerConnection);
+    setRoomCode(_roomCode);
+  }
+
+  useEffect(() => {
+    if (!ws || !peerConnection || !roomCode) return;
+
+    ws.onopen = () => {
+      register();
+    };
+
+    ws.onmessage = async message => {
+      message = JSON.parse(message.data);
+
+      switch (message.type) {
+        case 'offer':
+          await receiveOffer(message.description);
+          sendAnswer();
+          break;
+
+        case 'answer':
+          await receiveAnswer(message.description);
+          break;
+
+        case 'candidate':
+          handleRemoteCandidate(message.candidate);
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    ws.onerror = error => {
+      console.log('WebSocket error:', error.message);
+    };
+
+    ws.onclose = event => {
+      console.log('WebSocket connection closed');
+      console.log('Code:', event.code);
+      console.log('Reason:', event.reason);
+    };
+  }, [ws, peerConnection, roomCode]);
+
+  function register() {
     const request = {
       type: 'register',
       roomCode: roomCode,
@@ -14,66 +61,48 @@ const useSignalingServer = ({serverAddress, roomCode, isRoom, peerConnection}) =
     };
     ws.send(JSON.stringify(request));
     console.log('register request sent, isRoom: ' + isRoom);
-  };
+  }
 
-  ws.onmessage = async message => {
-    message = JSON.parse(message.data);
+  async function receiveOffer(description) {
+    try {
+      const offerDescription = new RTCSessionDescription(description);
+      await peerConnection.setRemoteDescription(offerDescription);
 
-    switch (message.type) {
-      case 'offer':
-        console.log('Offer received, isRoom: ' + isRoom);
-        try {
-          //if (makingOffer || peerConnection.signalingState !== 'stable') return;
+      const answerDescription = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answerDescription);
 
-          const offerDescription = new RTCSessionDescription(message.description);
-          await peerConnection.setRemoteDescription(offerDescription);
+      processCandidates();
 
-          const answerDescription = await peerConnection.createAnswer();
-          await peerConnection.setLocalDescription(answerDescription);
-
-          processCandidates();
-
-          const answer = {
-            type: 'answer',
-            roomCode: roomCode,
-            isRoom: !isRoom,
-            description: peerConnection.localDescription,
-          };
-          ws.send(JSON.stringify(answer));
-          console.log('Answer sent, isRoom: ' + isRoom);
-        } catch (e) {
-          console.log('Failed to process offer:' + e);
-        }
-        break;
-
-      case 'answer':
-        console.log('Answer received, isRoom: ' + isRoom);
-        try {
-          const answerDescription = new RTCSessionDescription(message.description);
-          await peerConnection.setRemoteDescription(answerDescription);
-        } catch (e) {
-          console.log('Failed to process answer:' + e);
-        }
-        break;
-
-      case 'candidate':
-        handleRemoteCandidate(message.candidate);
-        break;
-
-      default:
-        break;
+      console.log('Offer received, isRoom: ' + isRoom);
+    } catch (e) {
+      console.log('Failed to process offer: ' + e);
     }
-  };
+  }
 
-  ws.onerror = error => {
-    console.log('WebSocket error:', error.message);
-  };
+  async function receiveAnswer(description) {
+    try {
+      const answerDescription = new RTCSessionDescription(description);
+      await peerConnection.setRemoteDescription(answerDescription);
+      console.log('Answer received, isRoom: ' + isRoom);
+    } catch (e) {
+      console.log('Failed to process answer:' + e);
+    }
+  }
 
-  ws.onclose = event => {
-    console.log('WebSocket connection closed');
-    console.log('Code:', event.code);
-    console.log('Reason:', event.reason);
-  };
+  function sendAnswer() {
+    try {
+      const answer = {
+        type: 'answer',
+        roomCode: roomCode,
+        isRoom: !isRoom,
+        description: peerConnection.localDescription,
+      };
+      ws.send(JSON.stringify(answer));
+      console.log('Answer sent, isRoom: ' + isRoom);
+    } catch (e) {
+      console.log('Failed to send answer: ' + e);
+    }
+  }
 
   function handleRemoteCandidate(iceCandidate) {
     iceCandidate = new RTCIceCandidate(iceCandidate);
@@ -98,7 +127,7 @@ const useSignalingServer = ({serverAddress, roomCode, isRoom, peerConnection}) =
     remoteCandidates = [];
   }
 
-  return ws;
+  return [ ws, setupSignalingServer ];
 }
 
 export default useSignalingServer;

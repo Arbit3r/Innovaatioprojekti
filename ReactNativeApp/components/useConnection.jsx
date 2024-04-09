@@ -6,10 +6,16 @@ import {
 import useSignalingServer from './useSignalingServer';
 import useMediaStream from './useMediaStream';
 
-const useConnection = ({ roomCode, isRoom }) => {
-  const localMediaStream = useMediaStream();
+const useConnection = (isRoom) => {
+  const [roomCode, setRoomCode] = useState(null);
+  const [peerConnection, setPeerConnection] = useState(null);
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
+  const [ws, setupSignalingServer] = useSignalingServer(isRoom);
+
+  const localMediaStream = useMediaStream();
+  const serverAddress = useRef('ws://10.0.2.2:8080').current;
   let remoteMediaStreamBuffer = useRef(new MediaStream()).current;
+  let makingOffer = useRef(false).current;
 
   let peerConstraints = {
     iceServers: [
@@ -19,15 +25,20 @@ const useConnection = ({ roomCode, isRoom }) => {
     ]
   }
 
-  const serverAddress = 'ws://10.0.2.2:8080';
-  let peerConnection = useRef(new RTCPeerConnection(peerConstraints)).current;
-  const ws = useSignalingServer({ serverAddress, roomCode, isRoom, peerConnection });
-  let makingOffer = useRef(false).current;
+  function connectToServer(_roomCode) {
+    setPeerConnection(new RTCPeerConnection(peerConstraints));
+    setRoomCode(_roomCode);
+  }
 
   useEffect(() => {
-    if (!localMediaStream) return;
+    if (!roomCode || !peerConnection) return;
+    setupSignalingServer(serverAddress, peerConnection, roomCode);
+  }, [roomCode, peerConnection])
+
+  useEffect(() => {
+    if (!localMediaStream || !ws) return;
     setupPeerConnection();
-  }, [localMediaStream])
+  }, [localMediaStream, ws])
 
   function closePeerConnection() {
     peerConnection.close();
@@ -38,7 +49,7 @@ const useConnection = ({ roomCode, isRoom }) => {
     peerConnection.addEventListener('icecandidate', event => {handleIceCandidate(event)});
     peerConnection.addEventListener('icecandidateerror', event => {handleIceCandidateError(event)});
     peerConnection.addEventListener('iceconnectionstatechange', event => {handleIceConnectionStateChange(event)});
-    peerConnection.addEventListener('negotiationneeded', async event => {handleNegotiationNeeded(event)});
+    peerConnection.addEventListener('negotiationneeded', async event => {await handleNegotiationNeeded(event)});
     peerConnection.addEventListener('signalingstatechange', event => {handleSignalingStateChange(event)});
     peerConnection.addEventListener('track', event => {handleTrack(event)});
 
@@ -55,14 +66,13 @@ const useConnection = ({ roomCode, isRoom }) => {
       peerConnection.connectionState === 'failed') {
       if (!isRoom) return;
 
-      peerConnection = new RTCPeerConnection(peerConstraints);
-      setupPeerConnection();
-
       const message = {
         type: 'callEnded',
         roomCode: roomCode,
       }
       ws.send(JSON.stringify(message));
+
+      setPeerConnection(new RTCPeerConnection(peerConstraints));
     }
   }
 
@@ -149,7 +159,7 @@ const useConnection = ({ roomCode, isRoom }) => {
     }
   }
 
-  return [ remoteMediaStream, localMediaStream, closePeerConnection ];
+  return [ remoteMediaStream, localMediaStream, connectToServer, closePeerConnection ];
 }
 
 export default useConnection;

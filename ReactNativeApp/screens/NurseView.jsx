@@ -1,22 +1,25 @@
 // NurseView.jsx
 
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, StyleSheet, Button, Dimensions, Animated } from 'react-native';
 import { RTCView } from 'react-native-webrtc';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 import useConnection from "../components/useConnection";
 
 const NurseView = ({roomCode}) => {
-  const isRoom = false;
   const { t } = useTranslation(); // Initialize useTranslation hook
   const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
 
-  const [remoteStream, localStream, closePeerConnection] = useConnection({ roomCode, isRoom });
+  const [remoteStream, localStream, connectToServer, closePeerConnection] = useConnection(false);
 
   const [position, setPosition] = useState({
     x: windowWidth / 2 - 60, // Half the local stream width
     y: windowHeight / 2 - 80, // Half the local stream height
   });
+
+  useEffect(() => {
+    connectToServer(roomCode);
+  }, []);
 
   const handleCallCustomer = () => {
     // Your implementation to initiate a call to the customer
