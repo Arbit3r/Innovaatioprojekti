@@ -1,5 +1,4 @@
 import React from "react";
-import Connection from "../components/Connection";
 import { View, Text, Image, Pressable, StyleSheet } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 const Placeholder = () => {
@@ -13,7 +12,6 @@ const Placeholder = () => {
   <Image source={require("../assets/Benete-blue.png")} />
 </Pressable>
     </View>
-    <Connection roomCode={'123'} isRoom={true} />
   </>
   );
 }
