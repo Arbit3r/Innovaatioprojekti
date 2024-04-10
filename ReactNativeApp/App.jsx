@@ -18,7 +18,7 @@ import RoomNumber from './screens/RoomNumber';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Main from "./screens/Main"
-import Placeholder from "./screens/Placeholder"
+import NurseView from "./screens/NurseView";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18next from './services/i18next';
 const Stack = createNativeStackNavigator();
@@ -74,7 +74,7 @@ function App() {
         }
         console.log('Room number:', roomNumber);
         console.log('Role:', role);
-        setInitialRouteName(role === 'Resident' ? 'Main' : 'Placeholder');
+        setInitialRouteName(role === 'Resident' ? 'Main' : 'NurseView');
         console.log('Initial route:', initialRouteName);
       } catch (error) {
         console.error('Error checking stored data:', error);
@@ -116,7 +116,7 @@ function App() {
       <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{headerShown: false}}>
         <Stack.Screen name="RoomNumber" component={RoomNumber} />
         <Stack.Screen name="Main" component={Main} />
-        <Stack.Screen name="Placeholder" component={Placeholder} />
+        <Stack.Screen name="NurseView" component={NurseView} />
       </Stack.Navigator>
       <Modal
         visible={!!deepLinkData} 

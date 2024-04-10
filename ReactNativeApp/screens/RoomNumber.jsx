@@ -59,7 +59,7 @@ const RoomNumber = () => {
             ToastAndroid.show(t("room_number_empty"), ToastAndroid.SHORT);
         } else {
             saveDataToMemory();
-            navigation.replace(role === "Resident" ? 'Main' : 'Placeholder');
+            navigation.replace(role === "Resident" ? 'Main' : 'NurseView');
         }
     }
 
