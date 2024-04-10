@@ -1,14 +1,16 @@
 // NurseView.jsx
 
 import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet, Button, Dimensions, Animated } from 'react-native';
+import { View, Text, StyleSheet, Button, Dimensions, Animated, Pressable, Image } from 'react-native';
 import { RTCView } from 'react-native-webrtc';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
+import { useNavigation } from '@react-navigation/native';
 import useConnection from "../components/useConnection";
 
 const NurseView = ({roomCode}) => {
   const { t } = useTranslation(); // Initialize useTranslation hook
   const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
+  const navigation = useNavigation();
 
   const [remoteStream, localStream, connectToServer, closePeerConnection] = useConnection(false);
 
@@ -29,6 +31,13 @@ const NurseView = ({roomCode}) => {
 
   return (
     <View style={styles.container}>
+      <View>
+          <Pressable delayLongPress={3000} onLongPress={() => {
+              navigation.navigate('RoomNumber')
+          }}>
+              <Image source={require("../assets/Benete-blue.png")} />
+          </Pressable>
+      </View>
       <View style={styles.remoteStreamContainer}>
         <View style={styles.cameraContainer}>
           {remoteStream && (
