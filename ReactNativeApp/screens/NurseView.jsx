@@ -1,7 +1,7 @@
 // NurseView.jsx
 
 import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet, Button, Dimensions, Animated, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, Button, Dimensions, Animated, Pressable, ActivityIndicator, Image } from 'react-native';
 import { RTCView } from 'react-native-webrtc';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 import { useNavigation } from '@react-navigation/native';
@@ -11,6 +11,7 @@ const NurseView = ({roomCode}) => {
   const { t } = useTranslation(); // Initialize useTranslation hook
   const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
   const navigation = useNavigation();
+  const [buffering, setBuffering] = useState(true);
 
   const [remoteStream, localStream, connectToServer, closePeerConnection] = useConnection(false);
 
@@ -39,14 +40,21 @@ const NurseView = ({roomCode}) => {
           </Pressable>
       </View>
       <View style={styles.remoteStreamContainer}>
-        <View style={styles.cameraContainer}>
-          {remoteStream && (
-            <RTCView
-              style={styles.remoteStream}
-              streamURL={remoteStream.toURL()}
-            />
-          )}
-        </View>
+        {buffering ? (
+          <View>
+            <ActivityIndicator size="large" color="#0000ff" />
+            <Text style={styles.bufferingText}>Loading...</Text>
+          </View>
+        ) : (
+          <View style={styles.cameraContainer}>
+            {remoteStream && (
+              <RTCView
+                style={styles.remoteStream}
+                streamURL={remoteStream.toURL()}
+              />
+            )}
+          </View>
+        )}
       </View>
       <View style={styles.localStreamContainer}>
         {localStream && (
@@ -125,6 +133,9 @@ const styles = StyleSheet.create({
   },
   button: {
     borderRadius: 20, // Adjust the value to control the roundness of the corners
+  },
+  bufferingText: {
+    color: 'white',
   },
 });
 
