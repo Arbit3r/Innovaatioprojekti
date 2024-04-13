@@ -14,7 +14,7 @@ const useSignalingServer = (isRoom) => {
   }
 
   useEffect(() => {
-    if (!ws || !peerConnection || !roomCode) return;
+    if (!ws || !roomCode) return;
 
     ws.onopen = () => {
       register();

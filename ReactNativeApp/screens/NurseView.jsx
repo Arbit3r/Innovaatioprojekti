@@ -1,19 +1,31 @@
 // NurseView.jsx
 
 import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet, Button, Dimensions, Animated, Pressable, ActivityIndicator, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  Dimensions,
+  Animated,
+  Pressable,
+  ActivityIndicator,
+  Image,
+  BackHandler
+} from 'react-native';
 import { RTCView } from 'react-native-webrtc';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 import { useNavigation } from '@react-navigation/native';
 import useConnection from "../components/useConnection";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const NurseView = ({roomCode}) => {
   const { t } = useTranslation(); // Initialize useTranslation hook
   const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
   const navigation = useNavigation();
-  const [buffering, setBuffering] = useState(true);
 
-  const [remoteStream, localStream, connectToServer, closePeerConnection] = useConnection(false);
+  const [userData, setUserData] = useState({});
+  const [remoteStream, localStream, setRoomCode, closeWebSocket] = useConnection(false);
 
   const [position, setPosition] = useState({
     x: windowWidth / 2 - 60, // Half the local stream width
@@ -21,26 +33,42 @@ const NurseView = ({roomCode}) => {
   });
 
   useEffect(() => {
-    connectToServer(roomCode);
+    const fetchDataFromStorage = async () => {
+      try {
+        const data = await AsyncStorage.getItem('@userData');
+        if (data !== null) {
+          setUserData(JSON.parse(data));
+        }
+      } catch (error) {
+        console.error('Error fetching data from storage:', error);
+      }
+    };
+
+    fetchDataFromStorage();
   }, []);
+
+  useEffect(() => {
+    if (!userData.roomNumber) return;
+    setRoomCode(userData.roomNumber);
+  }, [userData.roomNumber]);
 
   const handleCallCustomer = () => {
     // Your implementation to initiate a call to the customer
-    closePeerConnection();
-    console.log('button pushed');
+    closeWebSocket();
   }
 
   return (
     <View style={styles.container}>
       <View>
           <Pressable delayLongPress={3000} onLongPress={() => {
-              navigation.navigate('RoomNumber')
+            closeWebSocket()
+            navigation.navigate('RoomNumber')
           }}>
-              <Image source={require("../assets/Benete-blue.png")} />
+            <Image source={require("../assets/Benete-blue.png")} />
           </Pressable>
       </View>
       <View style={styles.remoteStreamContainer}>
-        {buffering ? (
+        {!remoteStream ? (
           <View>
             <ActivityIndicator size="large" color="#0000ff" />
             <Text style={styles.bufferingText}>Loading...</Text>
@@ -66,7 +94,7 @@ const NurseView = ({roomCode}) => {
       </View>
       <View style={styles.buttonContainer}>
         <Button
-          title={t("call_customer_button")}
+          title={t("disconnect_button")}
           onPress={handleCallCustomer}
           color="red"
           style={styles.button}

@@ -25,23 +25,27 @@ const useConnection = (isRoom) => {
     ]
   }
 
-  function connectToServer(_roomCode) {
+  useEffect(() => {
+    if (!roomCode) return;
     setPeerConnection(new RTCPeerConnection(peerConstraints));
-    setRoomCode(_roomCode);
+    setupSignalingServer(serverAddress, peerConnection, roomCode);
+  }, [roomCode])
+
+  useEffect(() => {
+    if (!localMediaStream || !ws || !peerConnection) return;
+    setupPeerConnection();
+  }, [localMediaStream, ws, peerConnection])
+
+  function closeWebSocket() {
+    if (!ws) return;
+    closePeerConnection();
+    ws.close(1000, 'closeWebSocket function called');
   }
 
-  useEffect(() => {
-    if (!roomCode || !peerConnection) return;
-    setupSignalingServer(serverAddress, peerConnection, roomCode);
-  }, [roomCode, peerConnection])
-
-  useEffect(() => {
-    if (!localMediaStream || !ws) return;
-    setupPeerConnection();
-  }, [localMediaStream, ws])
-
   function closePeerConnection() {
+    if (!peerConnection) return;
     peerConnection.close();
+    setPeerConnection(null);
   }
 
   function setupPeerConnection() {
@@ -159,7 +163,7 @@ const useConnection = (isRoom) => {
     }
   }
 
-  return [ remoteMediaStream, localMediaStream, connectToServer, closePeerConnection ];
+  return [ remoteMediaStream, localMediaStream, setRoomCode, closeWebSocket ];
 }
 
 export default useConnection;
