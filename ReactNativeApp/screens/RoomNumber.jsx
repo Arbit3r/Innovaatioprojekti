@@ -27,10 +27,12 @@ const RoomNumber = () => {
             }
         };
 
-        fetchDataFromStorage();
 
+        fetchDataFromStorage();
         setAvailableLanguages(Object.keys(i18next.options.resources));
     }, []);
+
+    
 
     const saveDataToMemory = async () => {
         try {
@@ -66,12 +68,17 @@ const RoomNumber = () => {
     return ( 
         <View>
             <Text style={styles.screenTitle}>{t("screen_title")}</Text>
-            <TextInput 
-                style={styles.input} 
-                onChangeText={(input) => setRoomNumber(input)}
-                value={roomNumber}
-                placeholder={t("room_number_placeholder")}
-            />
+            {role !== 'Nurse' && (
+               <>
+               <Text style={styles.label}>{t("set_roomnumber_label")}</Text>
+                <TextInput 
+                    style={styles.input} 
+                    onChangeText={(input) => setRoomNumber(input)}
+                    value={roomNumber}
+                    placeholder={t("room_number_placeholder")}
+                />
+                </>
+            )}
 
             <Text style={styles.label}>{t("select_role_label")}</Text>
             <Picker
