@@ -50,6 +50,7 @@ const useSignalingServer = (isRoom) => {
       console.log('WebSocket connection closed');
       console.log('Code:', event.code);
       console.log('Reason:', event.reason);
+      setWs(null);
     };
   }, [ws, peerConnection, roomCode]);
 

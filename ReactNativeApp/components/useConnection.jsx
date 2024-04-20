@@ -9,12 +9,15 @@ import useMediaStream from './useMediaStream';
 const useConnection = (isRoom) => {
   const [roomCode, setRoomCode] = useState(null);
   const [peerConnection, setPeerConnection] = useState(null);
+  //const [remoteMediaStream, setRemoteMediaStream] = useState(null);
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
   const [ws, setupSignalingServer] = useSignalingServer(isRoom);
+  const [connectionState, setConnectionState] = useState('not started');
 
   const localMediaStream = useMediaStream();
   const serverAddress = useRef('ws://10.0.2.2:8080').current;
-  let remoteMediaStreamBuffer = useRef(new MediaStream()).current;
+  //const serverAddress = useRef('ws://91.155.246.145:8080').current;
+  const [remoteMediaStreamBuffer, setRemoteMediaStreamBuffer] = useState(null);
   let makingOffer = useRef(false).current;
 
   let peerConstraints = {
@@ -25,20 +28,36 @@ const useConnection = (isRoom) => {
     ]
   }
 
-  useEffect(() => {
-    if (!roomCode) return;
-    setPeerConnection(new RTCPeerConnection(peerConstraints));
-    setupSignalingServer(serverAddress, peerConnection, roomCode);
-  }, [roomCode])
+  function startConnection(roomCode_) {
+    setConnectionState('starting');
+    setRemoteMediaStreamBuffer(new MediaStream());
+    setRoomCode(roomCode_);
+  }
 
   useEffect(() => {
-    if (!localMediaStream || !ws || !peerConnection) return;
+    if (connectionState !== 'starting' || !roomCode || !remoteMediaStreamBuffer) return;
+    setPeerConnection(new RTCPeerConnection(peerConstraints));
+  }, [roomCode, connectionState, remoteMediaStreamBuffer])
+
+  useEffect(() => {
+    if (connectionState !== 'starting' || !peerConnection) return;
+    setupSignalingServer(serverAddress, peerConnection, roomCode);
+  }, [peerConnection, connectionState])
+
+  useEffect(() => {
+    if (connectionState !== 'starting' || !localMediaStream || !ws || !peerConnection) return;
     setupPeerConnection();
-  }, [localMediaStream, ws, peerConnection])
+    setConnectionState('connected');
+  }, [localMediaStream, ws, peerConnection, connectionState])
+
+  function closeConnection() {
+    closeWebSocket();
+    closePeerConnection();
+    setConnectionState('closed');
+  }
 
   function closeWebSocket() {
     if (!ws) return;
-    closePeerConnection();
     ws.close(1000, 'closeWebSocket function called');
   }
 
@@ -46,7 +65,13 @@ const useConnection = (isRoom) => {
     if (!peerConnection) return;
     peerConnection.close();
     setPeerConnection(null);
+    setRemoteMediaStream(null);
   }
+
+  useEffect(() => {
+    if (connectionState !== 'restarting' || peerConnection || ws || remoteMediaStream) return;
+    startConnection(roomCode);
+  }, [connectionState, peerConnection, ws, remoteMediaStream]);
 
   function setupPeerConnection() {
     peerConnection.addEventListener('connectionstatechange', event => {handleConnectionStateChange(event)});
@@ -65,10 +90,13 @@ const useConnection = (isRoom) => {
 
   function handleConnectionStateChange() {
     console.log('Connection state changed: ' + peerConnection.connectionState + ', isRoom: ' + isRoom);
-    if (peerConnection.connectionState === 'closed' ||
+    if (connectionState !== 'starting' &&
+      peerConnection.connectionState === 'closed' ||
       peerConnection.connectionState === 'disconnected' ||
       peerConnection.connectionState === 'failed') {
       if (!isRoom) return;
+
+      console.log('TEST Connection ended')
 
       const message = {
         type: 'callEnded',
@@ -76,7 +104,9 @@ const useConnection = (isRoom) => {
       }
       ws.send(JSON.stringify(message));
 
-      setPeerConnection(new RTCPeerConnection(peerConstraints));
+      setConnectionState('restarting');
+      closeWebSocket();
+      closePeerConnection();
     }
   }
 
@@ -157,13 +187,13 @@ const useConnection = (isRoom) => {
   function handleTrack(event) {
     // Grab the remote track from the connected participant.
     remoteMediaStreamBuffer.addTrack(event.track);
-    console.log('Tracks:' + remoteMediaStreamBuffer.getTracks().length);
+    console.log('Tracks:' + remoteMediaStreamBuffer.getTracks().length + ' isRoom: ' + isRoom);
     if (remoteMediaStreamBuffer.getTracks().length === 2) {
       setRemoteMediaStream(remoteMediaStreamBuffer);
     }
   }
 
-  return [ remoteMediaStream, localMediaStream, setRoomCode, closeWebSocket ];
+  return [ remoteMediaStream, localMediaStream, startConnection, closeConnection ];
 }
 
 export default useConnection;

@@ -25,7 +25,7 @@ const NurseView = ({roomCode}) => {
   const navigation = useNavigation();
 
   const [userData, setUserData] = useState({});
-  const [remoteStream, localStream, setRoomCode, closeWebSocket] = useConnection(false);
+  const [remoteStream, localStream, startConnection, closeConnection] = useConnection(false);
 
   const [position, setPosition] = useState({
     x: windowWidth / 2 - 60, // Half the local stream width
@@ -49,19 +49,19 @@ const NurseView = ({roomCode}) => {
 
   useEffect(() => {
     if (!userData.roomNumber) return;
-    setRoomCode(userData.roomNumber);
+    startConnection(userData.roomNumber);
   }, [userData.roomNumber]);
 
-  const handleCallCustomer = () => {
+  const handleDisconnect = () => {
     // Your implementation to initiate a call to the customer
-    closeWebSocket();
+    closeConnection();
   }
 
   return (
     <View style={styles.container}>
       <View>
           <Pressable delayLongPress={3000} onLongPress={() => {
-            closeWebSocket()
+            closeConnection()
             navigation.navigate('RoomNumber')
           }}>
             <Image source={require("../assets/Benete-blue.png")} />
@@ -95,7 +95,7 @@ const NurseView = ({roomCode}) => {
       <View style={styles.buttonContainer}>
         <Button
           title={t("disconnect_button")}
-          onPress={handleCallCustomer}
+          onPress={handleDisconnect}
           color="red"
           style={styles.button}
         />

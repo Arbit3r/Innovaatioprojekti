@@ -10,7 +10,7 @@ const Main = () => {
     const navigation = useNavigation();
     const [userData, setUserData] = useState({});
     const { t } = useTranslation();
-    const [remoteStream, localStream, setRoomCode, closeWebSocket] = useConnection(true);
+    const [remoteStream, localStream, startConnection, closeConnection] = useConnection(true);
 
     useEffect(() => {
         const fetchDataFromStorage = async () => {
@@ -29,7 +29,7 @@ const Main = () => {
 
     useEffect(() => {
         if (!userData.roomNumber) return;
-        setRoomCode(userData.roomNumber);
+        startConnection(userData.roomNumber);
     }, [userData.roomNumber]);
 
     // Determine the role text based on the user's role
@@ -48,7 +48,7 @@ const Main = () => {
           <View>
               <View style={styles.container}>
                   <Pressable delayLongPress={3000} onLongPress={() => {
-                      closeWebSocket();
+                      closeConnection();
                       navigation.navigate('RoomNumber')
                   }}>
                       <Image source={require("../assets/Benete-blue.png")} />
@@ -64,9 +64,9 @@ const Main = () => {
           </View>
           <View style={styles.body}>
               {
-                localStream &&
+                remoteStream &&
                 <RTCView
-                  streamURL={localStream.toURL()}
+                  streamURL={remoteStream.toURL()}
                   style={styles.stream} />
               }
           </View>
