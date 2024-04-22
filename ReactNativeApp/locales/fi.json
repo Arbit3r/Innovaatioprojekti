@@ -8,5 +8,7 @@
     "ready_button_title": "Valmis",
     "select_language_label": "Valitse kieli",
     "room_number_empty": "Huonetunnus ei voi olla tyhjä!",
-    "set_roomnumber_label": "Aseta huonetunnus"
+    "set_roomnumber_label": "Aseta huonetunnus",
+    "set_ipAdress_label": "Aseta IP-osoite",
+    "ipAddress_placeholder": "IP-osoite"
 }
