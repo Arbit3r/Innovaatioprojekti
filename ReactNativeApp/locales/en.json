@@ -8,5 +8,7 @@
     "ready_button_title": "Ready",
     "select_language_label": "Select Language",
     "room_number_empty": "Room number cannot be empty!",
-    "set_roomnumber_label": "Set Room Number"
+    "set_roomnumber_label": "Set Room Number",
+    "set_ipAdress_label": "Set IP Address",
+    "ipAddress_placeholder": "IP Address"
 }

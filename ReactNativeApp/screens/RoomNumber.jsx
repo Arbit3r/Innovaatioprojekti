@@ -11,6 +11,7 @@ const RoomNumber = () => {
     const navigation = useNavigation();
     const [roomNumber, setRoomNumber] = useState('');
     const [role, setRole] = useState('Resident');
+    const [ipAddress, setIpAddress] = useState('')
     const [availableLanguages, setAvailableLanguages] = useState([]);
 
     useEffect(() => {
@@ -21,6 +22,7 @@ const RoomNumber = () => {
                     const parsedData = JSON.parse(data);
                     setRoomNumber(parsedData.roomNumber);
                     setRole(parsedData.role);
+                    setIpAddress(parsedData.ipAddress)
                 }
             } catch (error) {
                 console.error('Error fetching data from storage:', error);
@@ -36,7 +38,7 @@ const RoomNumber = () => {
 
     const saveDataToMemory = async () => {
         try {
-            const data = JSON.stringify({ roomNumber, role });
+            const data = JSON.stringify({ roomNumber, role, ipAddress });
             await AsyncStorage.setItem('@userData', data);
         } catch (error) {
             console.error('Error saving data to memory:', error);
@@ -66,10 +68,8 @@ const RoomNumber = () => {
     }
 
     return ( 
-        <View>
+        <View style={styles.container}>
             <Text style={styles.screenTitle}>{t("screen_title")}</Text>
-            {role !== 'Nurse' && (
-               <>
                <Text style={styles.label}>{t("set_roomnumber_label")}</Text>
                 <TextInput 
                     style={styles.input} 
@@ -77,8 +77,16 @@ const RoomNumber = () => {
                     value={roomNumber}
                     placeholder={t("room_number_placeholder")}
                 />
-                </>
-            )}
+
+            <Text style={styles.label}>{t("set_ipAdress_label")}</Text>
+                <TextInput 
+                    style={styles.input} 
+                    onChangeText={(input) => setIpAddress(input)}
+                    value={ipAddress}
+                    placeholder={t("ipAddress_placeholder")}
+                />
+                
+            
 
             <Text style={styles.label}>{t("select_role_label")}</Text>
             <Picker
@@ -125,6 +133,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 5,
     },
+    container: {
+        padding: 5
+    }
 });
 
 export default RoomNumber;
