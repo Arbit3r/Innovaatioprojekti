@@ -12,6 +12,8 @@ const Main = () => {
     const { t } = useTranslation();
     const [remoteStream, localStream, startConnection, closeConnection] = useConnection(true);
 
+    const error = false // temporary variable for connection error
+
     useEffect(() => {
         const fetchDataFromStorage = async () => {
             try {
@@ -63,8 +65,10 @@ const Main = () => {
               </View>
           </View>
           <View style={styles.body}>
-              {
-                remoteStream &&
+              {error && (
+                <Text style={styles.errorText}>⚠️ Connection failed</Text>
+              )}
+              { remoteStream &&
                 <RTCView
                   streamURL={remoteStream.toURL()}
                   style={styles.stream} />
@@ -99,6 +103,13 @@ const styles = StyleSheet.create({
     },
     stream: {
         flex: 1
+    },
+    errorText: {
+        color: 'orange',
+        fontSize: 20,
+        position: 'absolute',
+        top: 30,
+        textAlign: 'center',
     },
 });
 

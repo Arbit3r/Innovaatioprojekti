@@ -27,6 +27,8 @@ const NurseView = ({roomCode}) => {
   const [userData, setUserData] = useState({});
   const [remoteStream, localStream, startConnection, closeConnection] = useConnection(false);
 
+  const error = false // temporary variable for connection error
+
   const [position, setPosition] = useState({
     x: windowWidth / 2 - 60, // Half the local stream width
     y: windowHeight / 2 - 80, // Half the local stream height
@@ -68,12 +70,16 @@ const NurseView = ({roomCode}) => {
           </Pressable>
       </View>
       <View style={styles.remoteStreamContainer}>
-        {!remoteStream ? (
+        {!remoteStream && !error && (
           <View>
             <ActivityIndicator size="large" color="#0000ff" />
             <Text style={styles.bufferingText}>Loading...</Text>
           </View>
-        ) : (
+        )}
+        {error && (
+          <Text style={styles.errorText}>⚠️ Connection failed</Text>
+        )}
+        {remoteStream && (
           <View style={styles.cameraContainer}>
             {remoteStream && (
               <RTCView
@@ -164,6 +170,13 @@ const styles = StyleSheet.create({
   },
   bufferingText: {
     color: 'white',
+  },
+  errorText: {
+    color: 'orange',
+    fontSize: 20,
+    position: 'absolute',
+    top: 60,
+    textAlign: 'center',
   },
 });
 
