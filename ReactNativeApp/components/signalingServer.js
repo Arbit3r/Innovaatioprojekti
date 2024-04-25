@@ -55,12 +55,12 @@ wss.on('connection', ws => {
 
                     handelConn(json).send(JSON.stringify(json));
                     //room.get(json.roomCode).inCall = true;
-                    let inCall = nurse.get(json.roomCode);
+                    let inCall = room.get(json.roomCode);
                     inCall = {
                         websocket : inCall.websocket,
                         inCall : true
                     };
-                    nurse.set(json.roomCode,inCall);
+                    room.set(json.roomCode,inCall);
                 }catch (e) {
                     console.log("Socket could not be connected to!");
                     ws.send("room not found");
@@ -181,6 +181,12 @@ wss.on('connection', ws => {
         } else if(isRoom === false){
 
             console.log(storageRoomNum + " nurse disconnected succefully: ");
+            let inCall = room.get(storageRoomNum);
+            inCall = {
+                websocket : inCall.websocket,
+                inCall : false
+            };
+            room.set(storageRoomNum,inCall);
 
             nurse.delete(storageRoomNum);
 
