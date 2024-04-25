@@ -9,16 +9,16 @@ import useMediaStream from './useMediaStream';
 const useConnection = (isRoom) => {
   const [roomCode, setRoomCode] = useState(null);
   const [peerConnection, setPeerConnection] = useState(null);
-  //const [remoteMediaStream, setRemoteMediaStream] = useState(null);
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
-  const [ws, setupSignalingServer] = useSignalingServer(isRoom);
   const [connectionState, setConnectionState] = useState('not started');
+  const [serverAddress, setServerAddress] = useState(null);
+  const [ws, setupSignalingServer] = useSignalingServer(isRoom, setConnectionState);
 
   const localMediaStream = useMediaStream();
-  const serverAddress = useRef('ws://10.0.2.2:8080').current;
+  //const serverAddress = useRef('ws://10.0.2.2:8080').current;
   //const serverAddress = useRef('ws://91.155.246.145:8080').current;
   const [remoteMediaStreamBuffer, setRemoteMediaStreamBuffer] = useState(null);
-  let makingOffer = useRef(false).current;
+  //let makingOffer = useRef(false).current;
 
   let peerConstraints = {
     iceServers: [
@@ -28,20 +28,31 @@ const useConnection = (isRoom) => {
     ]
   }
 
-  function startConnection(roomCode_) {
+  useEffect(() => {
+    console.log('connection state: ' + connectionState);
+  }, [connectionState])
+
+  function startConnection(roomCode_, serverAddress_) {
     setConnectionState('starting');
     setRemoteMediaStreamBuffer(new MediaStream());
     setRoomCode(roomCode_);
+    setServerAddress(serverAddress_);
   }
 
   useEffect(() => {
-    if (connectionState !== 'starting' || !roomCode || !remoteMediaStreamBuffer) return;
+    if (connectionState !== 'starting' || !roomCode || !serverAddress || !remoteMediaStreamBuffer) return;
     setPeerConnection(new RTCPeerConnection(peerConstraints));
-  }, [roomCode, connectionState, remoteMediaStreamBuffer])
+  }, [roomCode, serverAddress, connectionState, remoteMediaStreamBuffer])
 
   useEffect(() => {
     if (connectionState !== 'starting' || !peerConnection) return;
-    setupSignalingServer(serverAddress, peerConnection, roomCode);
+    try {
+      setupSignalingServer(serverAddress, peerConnection, roomCode);
+    } catch (e) {
+      setConnectionState('server connection failed');
+      closeWebSocket();
+      closePeerConnection();
+    }
   }, [peerConnection, connectionState])
 
   useEffect(() => {
@@ -63,6 +74,7 @@ const useConnection = (isRoom) => {
 
   function closePeerConnection() {
     if (!peerConnection) return;
+    console.log('closePeerConnection function called');
     peerConnection.close();
     setPeerConnection(null);
     setRemoteMediaStream(null);
@@ -90,13 +102,10 @@ const useConnection = (isRoom) => {
 
   function handleConnectionStateChange() {
     console.log('Connection state changed: ' + peerConnection.connectionState + ', isRoom: ' + isRoom);
-    if (connectionState !== 'starting' &&
-      peerConnection.connectionState === 'closed' ||
+    if (peerConnection.connectionState === 'closed' ||
       peerConnection.connectionState === 'disconnected' ||
       peerConnection.connectionState === 'failed') {
       if (!isRoom) return;
-
-      console.log('TEST Connection ended')
 
       const message = {
         type: 'callEnded',
@@ -143,9 +152,22 @@ const useConnection = (isRoom) => {
   }
 
   async function handleNegotiationNeeded(event) {
-    if (isRoom || makingOffer) return;
+    if (isRoom) return;
 
     try {
+      const request = {
+        type: 'call request',
+        roomCode: roomCode,
+        isRoom: !isRoom,
+      }
+
+      ws.send(JSON.stringify(request));
+      console.log('call request sent, isRoom: ' + isRoom);
+    } catch (e) {
+      console.log('error while sending call request: ' + e);
+    }
+
+    /*try {
       makingOffer = true;
 
       let sessionConstraints = {
@@ -172,7 +194,7 @@ const useConnection = (isRoom) => {
       console.log('Error while sending offer:' + e);
     } finally {
       makingOffer = false;
-    }
+    }*/
   }
 
   function handleSignalingStateChange(event) {
@@ -193,7 +215,7 @@ const useConnection = (isRoom) => {
     }
   }
 
-  return [ remoteMediaStream, localMediaStream, startConnection, closeConnection ];
+  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection ];
 }
 
 export default useConnection;

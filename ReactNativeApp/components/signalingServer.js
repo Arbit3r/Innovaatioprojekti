@@ -138,10 +138,10 @@ wss.on('connection', ws => {
 
                         if(inCall){
                             console.log("Call denied!");
-                            ws.send("request denied");
+                            ws.send(JSON.stringify({type: "request denied", reason: "room in use"}));
                         }else if(!inCall){
                             console.log("Call accepted!");
-                            ws.send("request accepted");
+                            ws.send(JSON.stringify({type: "request accepted"}));
                         }
 
                     }
@@ -152,15 +152,15 @@ wss.on('connection', ws => {
 
                         if(inCall){
                             console.log("Call denied!");
-                            ws.send("request denied");
+                            ws.send(JSON.stringify({type: "request denied"}));
                         }else if(!inCall){
                             console.log("Call accepted!");
-                            ws.send("request accepted");
+                            ws.send(JSON.stringify({type: "request accepted"}));
                         }
                     };
                 }catch (e) {
                     console.log("Room in use/not found!");
-                    ws.send("room not found");
+                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
                 }
                 break;
 

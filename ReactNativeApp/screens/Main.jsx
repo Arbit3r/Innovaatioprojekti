@@ -10,7 +10,7 @@ const Main = () => {
     const navigation = useNavigation();
     const [userData, setUserData] = useState({});
     const { t } = useTranslation();
-    const [remoteStream, localStream, startConnection, closeConnection] = useConnection(true);
+    const [remoteStream, localStream, connectionState, startConnection, closeConnection] = useConnection(true);
 
     const error = false // temporary variable for connection error
 
@@ -30,9 +30,9 @@ const Main = () => {
     }, []);
 
     useEffect(() => {
-        if (!userData.roomNumber) return;
-        startConnection(userData.roomNumber);
-    }, [userData.roomNumber]);
+        if (!userData.roomNumber || !userData.ipAddress) return;
+        startConnection(userData.roomNumber, userData.ipAddress);
+    }, [userData.roomNumber, userData.ipAddress]);
 
     // Determine the role text based on the user's role
     const getRoleText = () => {
@@ -65,7 +65,7 @@ const Main = () => {
               </View>
           </View>
           <View style={styles.body}>
-              {error && (
+              {connectionState === 'server connection failed' && (
                 <Text style={styles.errorText}>⚠️ Connection failed</Text>
               )}
               { remoteStream &&

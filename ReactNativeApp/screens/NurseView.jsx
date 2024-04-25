@@ -25,7 +25,7 @@ const NurseView = ({roomCode}) => {
   const navigation = useNavigation();
 
   const [userData, setUserData] = useState({});
-  const [remoteStream, localStream, startConnection, closeConnection] = useConnection(false);
+  const [remoteStream, localStream, connectionState, startConnection, closeConnection] = useConnection(false);
 
   const error = false // temporary variable for connection error
 
@@ -50,9 +50,9 @@ const NurseView = ({roomCode}) => {
   }, []);
 
   useEffect(() => {
-    if (!userData.roomNumber) return;
-    startConnection(userData.roomNumber);
-  }, [userData.roomNumber]);
+    if (!userData.roomNumber || !userData.ipAddress) return;
+    startConnection(userData.roomNumber, userData.ipAddress);
+  }, [userData.roomNumber, userData.ipAddress]);
 
   const handleDisconnect = () => {
     // Your implementation to initiate a call to the customer
@@ -76,7 +76,7 @@ const NurseView = ({roomCode}) => {
             <Text style={styles.bufferingText}>Loading...</Text>
           </View>
         )}
-        {error && (
+        {connectionState === 'server connection failed' && (
           <Text style={styles.errorText}>⚠️ Connection failed</Text>
         )}
         {remoteStream && (
