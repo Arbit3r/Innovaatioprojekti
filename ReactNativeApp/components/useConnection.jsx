@@ -15,10 +15,7 @@ const useConnection = (isRoom) => {
   const [ws, setupSignalingServer] = useSignalingServer(isRoom, setConnectionState);
 
   const localMediaStream = useMediaStream();
-  //const serverAddress = useRef('ws://10.0.2.2:8080').current;
-  //const serverAddress = useRef('ws://91.155.246.145:8080').current;
   const [remoteMediaStreamBuffer, setRemoteMediaStreamBuffer] = useState(null);
-  //let makingOffer = useRef(false).current;
 
   let peerConstraints = {
     iceServers: [
@@ -29,7 +26,7 @@ const useConnection = (isRoom) => {
   }
 
   useEffect(() => {
-    console.log('connection state: ' + connectionState);
+    console.log('connection state: ' + connectionState + ', isRoom: ' + isRoom);
   }, [connectionState])
 
   function startConnection(roomCode_, serverAddress_) {
@@ -46,13 +43,7 @@ const useConnection = (isRoom) => {
 
   useEffect(() => {
     if (connectionState !== 'starting' || !peerConnection) return;
-    try {
-      setupSignalingServer(serverAddress, peerConnection, roomCode);
-    } catch (e) {
-      setConnectionState('server connection failed');
-      closeWebSocket();
-      closePeerConnection();
-    }
+    setupSignalingServer(serverAddress, peerConnection, roomCode);
   }, [peerConnection, connectionState])
 
   useEffect(() => {
@@ -82,7 +73,7 @@ const useConnection = (isRoom) => {
 
   useEffect(() => {
     if (connectionState !== 'restarting' || peerConnection || ws || remoteMediaStream) return;
-    startConnection(roomCode);
+    startConnection(roomCode, serverAddress);
   }, [connectionState, peerConnection, ws, remoteMediaStream]);
 
   function setupPeerConnection() {
@@ -146,7 +137,7 @@ const useConnection = (isRoom) => {
         break;
       case 'completed':
         console.log('ICE connection state: completed');
-        if (!isRoom) ws.close(1000, 'Connected to room');
+        //if (!isRoom) ws.close(1000, 'Connected to room');
         break;
     }
   }
