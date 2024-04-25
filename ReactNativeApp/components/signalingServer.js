@@ -2,8 +2,6 @@ const { WebSocketServer } = require('ws');
 
 const wss = new WebSocketServer({port: 8080 });
 
-//let room = [];
-//let nurse = [];
 const room = new Map();
 const nurse = new Map();
 
@@ -14,8 +12,17 @@ function  handelConn(json) {
     let response;
     let isRoom = json.isRoom && JSON.parse(json.isRoom);
 
-    if(isRoom){response = room.get(json.roomCode);}
-    else if(!isRoom){response = nurse.get(json.roomCode);
+    if(isRoom){
+        if(room.get(json.roomCode) != undefined){
+            response = room.get(json.roomCode);
+            response = response.websocket;
+        }
+    }
+    else if(!isRoom){
+        if(nurse.get(json.roomCode) != undefined){
+            response = nurse.get(json.roomCode);
+            response = response.websocket;
+        }
 
     } else {
         console.log("Socket not found!");
@@ -45,9 +52,18 @@ wss.on('connection', ws => {
                 console.log("Calling to " + json.roomCode + "!");
 
                 try {
+
                     handelConn(json).send(JSON.stringify(json));
+                    //room.get(json.roomCode).inCall = true;
+                    let inCall = nurse.get(json.roomCode);
+                    inCall = {
+                        websocket : inCall.websocket,
+                        inCall : true
+                    };
+                    nurse.set(json.roomCode,inCall);
                 }catch (e) {
                     console.log("Socket could not be connected to!");
+                    ws.send("room not found");
                 }
 
                 break;
@@ -61,6 +77,7 @@ wss.on('connection', ws => {
                     handelConn(json).send(JSON.stringify(json));
                 }catch (e) {
                     console.log("Socket could not be connected to!");
+                    ws.send("room not found");
                 }
                 break;
 
@@ -76,15 +93,20 @@ wss.on('connection', ws => {
                         console.log("Pushing " + json.roomCode + " to room array!");
                         storageRoomNum = json.roomCode;
                         isRoom = true;
-                        room.set(json.roomCode,ws);
+                        room.set(json.roomCode,{
+                            websocket : ws,
+                            inCall : false
+                        });
 
                     } else if(json2 === false){
 
                         console.log("Pushing " + json.roomCode + " to nurse array!")
                         storageRoomNum = json.roomCode;
                         isRoom = false;
-                        nurse.set(json.roomCode,ws);
-
+                        nurse.set(json.roomCode,{
+                            websocket : ws,
+                            inCall : false
+                        });
                     }
                 };
                 break;
@@ -97,6 +119,48 @@ wss.on('connection', ws => {
                     handelConn(json).send(JSON.stringify(json));
                 }catch (e) {
                     console.log("Socket could not be connected to!");
+                    ws.send("room not found");
+                }
+                break;
+
+                //Checking if searched roomCode is in call!
+            case "call request":
+
+                console.log("Call request! " + json.roomCode + " " + json.isRoom);
+                let inCall = false;
+                let roomCheck = json.isRoom && JSON.parse(json.isRoom);
+
+                try {
+                    if(roomCheck){
+
+                        inCall = room.get(json.roomCode);
+                        inCall = inCall.inCall;
+
+                        if(inCall){
+                            console.log("Call denied!");
+                            ws.send("request denied");
+                        }else if(!inCall){
+                            console.log("Call accepted!");
+                            ws.send("request accepted!");
+                        }
+
+                    }
+                    else if(!roomCheck){
+
+                        inCall = nurse.get(json.roomCode);
+                        inCall = inCall.inCall;
+
+                        if(inCall){
+                            console.log("Call denied!");
+                            ws.send("request denied");
+                        }else if(!inCall){
+                            console.log("Call accepted!");
+                            ws.send("request accepted!");
+                        }
+                    };
+                }catch (e) {
+                    console.log("Room in use/not found!");
+                    ws.send("room not found");
                 }
                 break;
 
@@ -111,12 +175,12 @@ wss.on('connection', ws => {
 
         if(isRoom === true){
 
-            console.log(storageRoomNum + " disconnected succefully: " + room.has(storageRoomNum));
+            console.log(storageRoomNum + " room disconnected succefully: ");
             room.delete(storageRoomNum);
 
         } else if(isRoom === false){
 
-            console.log(storageRoomNum + " disconnected succefully: " + nurse.has(storageRoomNum));
+            console.log(storageRoomNum + " nurse disconnected succefully: ");
 
             nurse.delete(storageRoomNum);
 
