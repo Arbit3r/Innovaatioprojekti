@@ -141,7 +141,7 @@ wss.on('connection', ws => {
                             ws.send("request denied");
                         }else if(!inCall){
                             console.log("Call accepted!");
-                            ws.send("request accepted!");
+                            ws.send("request accepted");
                         }
 
                     }
@@ -155,7 +155,7 @@ wss.on('connection', ws => {
                             ws.send("request denied");
                         }else if(!inCall){
                             console.log("Call accepted!");
-                            ws.send("request accepted!");
+                            ws.send("request accepted");
                         }
                     };
                 }catch (e) {
