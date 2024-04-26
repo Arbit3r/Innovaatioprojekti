@@ -148,6 +148,7 @@ const useSignalingServer = (isRoom, setConnectionState) => {
     try {
       const answerDescription = new RTCSessionDescription(description);
       await peerConnection.setRemoteDescription(answerDescription);
+      processCandidates();
       console.log('Answer received, isRoom: ' + isRoom);
     } catch (e) {
       console.log('Failed to process answer:' + e);
