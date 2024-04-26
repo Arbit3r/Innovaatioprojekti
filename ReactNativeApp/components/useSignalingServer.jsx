@@ -165,18 +165,18 @@ const useSignalingServer = (isRoom, setConnectionState) => {
     // Sometimes candidates will be received before remoteDescription is set.
     // In this case they are added to the remoteCandidates array.
     if (peerConnection.remoteDescription == null) {
-      console.log('candidate added to array')
+      console.log('candidate added to array, isRoom: ' + isRoom)
       return remoteCandidates.push(iceCandidate);
     }
 
-    console.log('candidate added directly')
+    console.log('candidate added directly, isRoom: ' + isRoom)
     return peerConnection.addIceCandidate(iceCandidate);
   }
 
   // Process candidates that couldn't be processed in handleRemoteCandidate.
   function processCandidates() {
     if (remoteCandidates.length < 1) return;
-    console.log('candidates added from array')
+    console.log('candidates added from array, isRoom: ' + isRoom)
 
     remoteCandidates.map(candidate =>
       peerConnection.addIceCandidate(candidate),
