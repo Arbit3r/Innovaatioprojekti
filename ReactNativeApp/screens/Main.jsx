@@ -34,6 +34,13 @@ const Main = () => {
         startConnection(userData.roomNumber, userData.ipAddress);
     }, [userData.roomNumber, userData.ipAddress]);
 
+    useEffect(() => {
+        if (connectionState === 'restarting') {
+            closeConnection();
+            navigation.replace('Main');
+        }
+    }, [connectionState])
+
     // Determine the role text based on the user's role
     const getRoleText = () => {
         if (userData.role === 'Resident') {

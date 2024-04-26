@@ -18,6 +18,7 @@ const useSignalingServer = (isRoom, setConnectionState) => {
     if (!ws || !roomCode) return;
 
     ws.onopen = () => {
+      setConnectionState('connected');
       register();
     };
 
@@ -27,6 +28,7 @@ const useSignalingServer = (isRoom, setConnectionState) => {
       switch (message.type) {
         case 'request accepted':
           console.log('request accepted')
+          setConnectionState('in call');
           await sendOffer();
           break;
 
@@ -35,6 +37,7 @@ const useSignalingServer = (isRoom, setConnectionState) => {
           break;
 
         case 'offer':
+          setConnectionState('in call');
           await receiveOffer(message.description);
           sendAnswer();
           break;

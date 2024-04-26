@@ -10,8 +10,15 @@ const useConnection = (isRoom) => {
   const [roomCode, setRoomCode] = useState(null);
   const [peerConnection, setPeerConnection] = useState(null);
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
-  const [connectionState, setConnectionState] = useState('not started');
   const [serverAddress, setServerAddress] = useState(null);
+
+  const [connectionState, _setConnectionState] = useState('not started');
+  const connectionStateRef = useRef(connectionState); // React states cannot be used inside event listeners, this Ref will be used inside those instead
+  // Whenever connectionState is updated, update the Ref as well
+  const setConnectionState = data => {
+    connectionStateRef.current = data;
+    _setConnectionState(data)
+  }
   const [ws, setupSignalingServer] = useSignalingServer(isRoom, setConnectionState);
 
   const localMediaStream = useMediaStream();
@@ -26,20 +33,21 @@ const useConnection = (isRoom) => {
   }
 
   useEffect(() => {
-    console.log('connection state: ' + connectionState + ', isRoom: ' + isRoom);
+    console.log('connection state variable: ' + connectionState + ', isRoom: ' + isRoom);
   }, [connectionState])
 
   function startConnection(roomCode_, serverAddress_) {
     setConnectionState('starting');
+    setRemoteMediaStream(null);
     setRemoteMediaStreamBuffer(new MediaStream());
     setRoomCode(roomCode_);
     setServerAddress(serverAddress_);
   }
 
   useEffect(() => {
-    if (connectionState !== 'starting' || !roomCode || !serverAddress || !remoteMediaStreamBuffer) return;
+    if (connectionState !== 'starting' || !roomCode || !serverAddress || !remoteMediaStreamBuffer || remoteMediaStream) return;
     setPeerConnection(new RTCPeerConnection(peerConstraints));
-  }, [roomCode, serverAddress, connectionState, remoteMediaStreamBuffer])
+  }, [roomCode, serverAddress, connectionState, remoteMediaStreamBuffer, remoteMediaStream])
 
   useEffect(() => {
     if (connectionState !== 'starting' || !peerConnection) return;
@@ -47,15 +55,14 @@ const useConnection = (isRoom) => {
   }, [peerConnection, connectionState])
 
   useEffect(() => {
-    if (connectionState !== 'starting' || !localMediaStream || !ws || !peerConnection) return;
+    if (connectionState !== 'connected' || !localMediaStream || !ws || !peerConnection) return;
     setupPeerConnection();
-    setConnectionState('connected');
+    //setConnectionState('connected');
   }, [localMediaStream, ws, peerConnection, connectionState])
 
   function closeConnection() {
     closeWebSocket();
     closePeerConnection();
-    setConnectionState('closed');
   }
 
   function closeWebSocket() {
@@ -68,13 +75,12 @@ const useConnection = (isRoom) => {
     console.log('closePeerConnection function called');
     peerConnection.close();
     setPeerConnection(null);
-    setRemoteMediaStream(null);
   }
 
-  useEffect(() => {
-    if (connectionState !== 'restarting' || peerConnection || ws || remoteMediaStream) return;
+  /*useEffect(() => {
+    if (connectionState !== 'restarting' || peerConnection || ws) return;
     startConnection(roomCode, serverAddress);
-  }, [connectionState, peerConnection, ws, remoteMediaStream]);
+  }, [connectionState, peerConnection, ws]);*/
 
   function setupPeerConnection() {
     peerConnection.addEventListener('connectionstatechange', event => {handleConnectionStateChange(event)});
@@ -93,25 +99,13 @@ const useConnection = (isRoom) => {
 
   function handleConnectionStateChange() {
     console.log('Connection state changed: ' + peerConnection.connectionState + ', isRoom: ' + isRoom);
-    if (peerConnection.connectionState === 'closed' ||
+    if (connectionStateRef.current === 'in call' &&
+      (peerConnection.connectionState === 'closed' ||
       peerConnection.connectionState === 'disconnected' ||
-      peerConnection.connectionState === 'failed') {
-      if (!isRoom || connectionState !== 'connected') return;
+      peerConnection.connectionState === 'failed')) {
+      if (!isRoom) return;
 
-      /*try {*/
-        const message = {
-          type: 'callEnded',
-          roomCode: roomCode,
-        }
-        ws.send(JSON.stringify(message));
-
-        setConnectionState('restarting');
-        closeWebSocket();
-        closePeerConnection();
-      /*} catch (e) {
-        console.log('failed to send callEnded: ' + e);
-      }*/
-
+      setConnectionState('restarting');
     }
   }
 
