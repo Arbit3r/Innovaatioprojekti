@@ -96,9 +96,9 @@ const useConnection = (isRoom) => {
     if (peerConnection.connectionState === 'closed' ||
       peerConnection.connectionState === 'disconnected' ||
       peerConnection.connectionState === 'failed') {
-      if (!isRoom) return;
+      if (!isRoom || connectionState !== 'connected') return;
 
-      try {
+      /*try {*/
         const message = {
           type: 'callEnded',
           roomCode: roomCode,
@@ -108,9 +108,9 @@ const useConnection = (isRoom) => {
         setConnectionState('restarting');
         closeWebSocket();
         closePeerConnection();
-      } catch (e) {
+      /*} catch (e) {
         console.log('failed to send callEnded: ' + e);
-      }
+      }*/
 
     }
   }
