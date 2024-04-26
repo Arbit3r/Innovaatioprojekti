@@ -68,13 +68,18 @@ const useSignalingServer = (isRoom, setConnectionState) => {
   }, [ws, peerConnection, roomCode]);
 
   function register() {
-    const request = {
-      type: 'register',
-      roomCode: roomCode,
-      isRoom: isRoom,
-    };
-    ws.send(JSON.stringify(request));
-    console.log('register request sent, isRoom: ' + isRoom);
+    try {
+      const request = {
+        type: 'register',
+        roomCode: roomCode,
+        isRoom: isRoom,
+      };
+      ws.send(JSON.stringify(request));
+      console.log('register request sent, isRoom: ' + isRoom);
+    } catch (e) {
+      console.log('failed to send register request: ' + e);
+    }
+
   }
 
   async function sendOffer() {
@@ -159,15 +164,18 @@ const useSignalingServer = (isRoom, setConnectionState) => {
     // Sometimes candidates will be received before remoteDescription is set.
     // In this case they are added to the remoteCandidates array.
     if (peerConnection.remoteDescription == null) {
+      console.log('candidate added to array')
       return remoteCandidates.push(iceCandidate);
     }
 
+    console.log('candidate added directly')
     return peerConnection.addIceCandidate(iceCandidate);
   }
 
   // Process candidates that couldn't be processed in handleRemoteCandidate.
   function processCandidates() {
     if (remoteCandidates.length < 1) return;
+    console.log('candidates added from array')
 
     remoteCandidates.map(candidate =>
       peerConnection.addIceCandidate(candidate),

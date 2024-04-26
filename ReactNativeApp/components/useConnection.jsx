@@ -98,15 +98,20 @@ const useConnection = (isRoom) => {
       peerConnection.connectionState === 'failed') {
       if (!isRoom) return;
 
-      const message = {
-        type: 'callEnded',
-        roomCode: roomCode,
-      }
-      ws.send(JSON.stringify(message));
+      try {
+        const message = {
+          type: 'callEnded',
+          roomCode: roomCode,
+        }
+        ws.send(JSON.stringify(message));
 
-      setConnectionState('restarting');
-      closeWebSocket();
-      closePeerConnection();
+        setConnectionState('restarting');
+        closeWebSocket();
+        closePeerConnection();
+      } catch (e) {
+        console.log('failed to send callEnded: ' + e);
+      }
+
     }
   }
 
@@ -116,14 +121,19 @@ const useConnection = (isRoom) => {
     if (!event.candidate) return;
 
     // Keeping to Trickle ICE Standards, the candidates are sent immediately.
-    const candidate = {
-      type: 'candidate',
-      roomCode: roomCode,
-      isRoom: !isRoom,
-      candidate: event.candidate,
-    };
-    ws.send(JSON.stringify(candidate));
-    console.log('ICE candidate sent, isRoom: ' + isRoom);
+    try {
+      const candidate = {
+        type: 'candidate',
+        roomCode: roomCode,
+        isRoom: !isRoom,
+        candidate: event.candidate,
+      };
+      ws.send(JSON.stringify(candidate));
+      console.log('ICE candidate sent, isRoom: ' + isRoom);
+    } catch (e) {
+      console.log('failed to send candidate: ' + e);
+    }
+
   }
 
   function handleIceCandidateError(event) {
