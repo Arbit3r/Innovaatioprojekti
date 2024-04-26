@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet, Appearance} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from 'react-i18next';
@@ -11,8 +11,11 @@ const Main = () => {
     const [userData, setUserData] = useState({});
     const { t } = useTranslation();
     const [remoteStream, localStream, connectionState, startConnection, closeConnection] = useConnection(true);
-
     const error = false // temporary variable for connection error
+
+    const [isDarkMode, setIsDarkMode] = useState(
+        Appearance.getColorScheme() === 'dark'
+      );
 
     useEffect(() => {
         const fetchDataFromStorage = async () => {
@@ -41,6 +44,16 @@ const Main = () => {
         }
     }, [connectionState])
 
+    useEffect(() => {
+        const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+          setIsDarkMode(colorScheme === 'dark');
+        });
+    
+        return () => {
+          subscription.remove();
+        };
+      }, []);
+
     // Determine the role text based on the user's role
     const getRoleText = () => {
         if (userData.role === 'Resident') {
@@ -54,6 +67,7 @@ const Main = () => {
 
     return (
       <>
+      <View style={[styles.background, { backgroundColor: isDarkMode ? '#262626' : '#fff' }]}>
           <View>
               <View style={styles.container}>
                   <Pressable delayLongPress={3000} onLongPress={() => {
@@ -80,6 +94,7 @@ const Main = () => {
                   streamURL={remoteStream.toURL()}
                   style={styles.stream} />
               }
+          </View>
           </View>
       </>
     );
@@ -118,6 +133,11 @@ const styles = StyleSheet.create({
         top: 30,
         textAlign: 'center',
     },
+    background: {
+        width: "100%",
+        height: "100%"
+    }
+
 });
 
 export default Main;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ToastAndroid } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ToastAndroid, Appearance } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -13,6 +13,9 @@ const RoomNumber = () => {
     const [role, setRole] = useState('Resident');
     const [ipAddress, setIpAddress] = useState('')
     const [availableLanguages, setAvailableLanguages] = useState([]);
+    const [isDarkMode, setIsDarkMode] = useState(
+        Appearance.getColorScheme() === 'dark'
+      );
 
     useEffect(() => {
         const fetchDataFromStorage = async () => {
@@ -34,6 +37,15 @@ const RoomNumber = () => {
         setAvailableLanguages(Object.keys(i18next.options.resources));
     }, []);
 
+    useEffect(() => {
+        const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+          setIsDarkMode(colorScheme === 'dark');
+        });
+    
+        return () => {
+          subscription.remove();
+        };
+      }, []);
     
 
     const saveDataToMemory = async () => {
@@ -68,7 +80,7 @@ const RoomNumber = () => {
     }
 
     return ( 
-        <View style={styles.container}>
+        <View style={[styles.background, { backgroundColor: isDarkMode ? '#262626' : '#fff' }]}>
             <Text style={styles.screenTitle}>{t("screen_title")}</Text>
                <Text style={styles.label}>{t("set_roomnumber_label")}</Text>
                 <TextInput 
@@ -133,8 +145,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 5,
     },
-    container: {
-        padding: 5
+    background: {
+        padding: 5,
+        width: "100%",
+        height: "100%"
+        
     }
 });
 

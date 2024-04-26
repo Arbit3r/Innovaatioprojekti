@@ -1,5 +1,3 @@
-// NurseView.jsx
-
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -11,7 +9,8 @@ import {
   Pressable,
   ActivityIndicator,
   Image,
-  BackHandler
+  BackHandler,
+  Appearance
 } from 'react-native';
 import { RTCView } from 'react-native-webrtc';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
@@ -33,6 +32,10 @@ const NurseView = ({roomCode}) => {
     x: windowWidth / 2 - 60, // Half the local stream width
     y: windowHeight / 2 - 80, // Half the local stream height
   });
+
+  const [isDarkMode, setIsDarkMode] = useState(
+    Appearance.getColorScheme() === 'dark'
+  );
 
   useEffect(() => {
     const fetchDataFromStorage = async () => {
@@ -59,7 +62,18 @@ const NurseView = ({roomCode}) => {
     closeConnection();
   }
 
+  useEffect(() => {
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      setIsDarkMode(colorScheme === 'dark');
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return (
+    <View style={[styles.background, { backgroundColor: isDarkMode ? '#262626' : '#fff' }]}>
     <View style={styles.container}>
       <View>
           <Pressable delayLongPress={3000} onLongPress={() => {
@@ -107,6 +121,7 @@ const NurseView = ({roomCode}) => {
         />
       </View>
     </View>
+    </View>
   );
 };
 
@@ -116,7 +131,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
   },
   remoteStreamContainer: {
     flex: 1,
@@ -178,6 +192,10 @@ const styles = StyleSheet.create({
     top: 60,
     textAlign: 'center',
   },
+  background: {
+    width: "100%",
+    height: "100%"
+  }
 });
 
 export default NurseView;
