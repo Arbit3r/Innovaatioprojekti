@@ -63,7 +63,7 @@ wss.on('connection', ws => {
                     room.set(json.roomCode,inCall);
                 }catch (e) {
                     console.log("Socket could not be connected to!");
-                    ws.send("room not found");
+                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
                 }
 
                 break;
@@ -77,7 +77,7 @@ wss.on('connection', ws => {
                     handelConn(json).send(JSON.stringify(json));
                 }catch (e) {
                     console.log("Socket could not be connected to!");
-                    ws.send("room not found");
+                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
                 }
                 break;
 
@@ -119,7 +119,7 @@ wss.on('connection', ws => {
                     handelConn(json).send(JSON.stringify(json));
                 }catch (e) {
                     console.log("Socket could not be connected to!");
-                    ws.send("room not found");
+                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
                 }
                 break;
 
@@ -152,7 +152,7 @@ wss.on('connection', ws => {
 
                         if(inCall){
                             console.log("Call denied!");
-                            ws.send(JSON.stringify({type: "request denied"}));
+                            ws.send(JSON.stringify({type: "request denied", reason: "room in use"}));
                         }else if(!inCall){
                             console.log("Call accepted!");
                             ws.send(JSON.stringify({type: "request accepted"}));
@@ -182,10 +182,14 @@ wss.on('connection', ws => {
 
             console.log(storageRoomNum + " nurse disconnected succefully: ");
             let inCall = room.get(storageRoomNum);
-            inCall = {
-                websocket : inCall.websocket,
-                inCall : false
-            };
+            try {
+                inCall = {
+                    websocket : inCall.websocket,
+                    inCall : false
+                };
+            }catch (e) {
+                console.log(e);
+            }
             room.set(storageRoomNum,inCall);
 
             nurse.delete(storageRoomNum);
