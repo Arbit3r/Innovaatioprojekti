@@ -10,5 +10,6 @@
     "room_number_empty": "Huonetunnus ei voi olla tyhjä!",
     "set_roomnumber_label": "Aseta huonetunnus",
     "set_ipAdress_label": "Aseta IP-osoite",
-    "ipAddress_placeholder": "IP-osoite"
+    "ipAddress_placeholder": "IP-osoite",
+    "disconnect_button": "Lopeta Puhelu",
 }

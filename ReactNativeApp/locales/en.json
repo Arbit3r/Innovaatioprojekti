@@ -10,5 +10,6 @@
     "room_number_empty": "Room number cannot be empty!",
     "set_roomnumber_label": "Set Room Number",
     "set_ipAdress_label": "Set IP Address",
-    "ipAddress_placeholder": "IP Address"
+    "ipAddress_placeholder": "IP Address",
+    "disconnect_button": "End Call"
 }

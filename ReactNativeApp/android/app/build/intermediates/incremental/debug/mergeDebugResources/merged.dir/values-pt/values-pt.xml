@@ -31,6 +31,7 @@
     <string gender="unknown" name="catalyst_dev_menu_header">Menu de desenvolvedor de reações nativas (%1$s)</string>
     <string gender="unknown" name="catalyst_dev_menu_sub_header">%1$s em veiculação</string>
     <string gender="unknown" name="combobox_description">Caixa de combinação</string>
+    <string msgid="1234962710353108940" name="expand_button_title">"Avançado"</string>
     <string gender="unknown" name="header_description">Título</string>
     <string gender="unknown" name="image_description">Imagem</string>
     <string gender="unknown" name="imagebutton_description">Botão, imagem</string>
@@ -52,8 +53,11 @@
     <string gender="unknown" name="state_on_description">ativado</string>
     <string gender="unknown" name="state_unselected_description">desmarcados</string>
     <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="5190123168583152844" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
     <string gender="unknown" name="summary_description">Resumo</string>
     <string gender="unknown" name="tablist_description">Lista de abas</string>
     <string gender="unknown" name="timer_description">Temporizador</string>
     <string gender="unknown" name="toolbar_description">Barra de ferramentas</string>
+    <string msgid="5138405918326871307" name="v7_preference_off">"DESATIVADO"</string>
+    <string msgid="27351710992731591" name="v7_preference_on">"ATIVADO"</string>
 </resources>

@@ -89,10 +89,10 @@ const Main = () => {
               {connectionState === 'server connection failed' && (
                 <Text style={styles.errorText}>⚠️ Connection failed</Text>
               )}
-              { remoteStream &&
+              { localStream &&
                 <RTCView
-                  streamURL={remoteStream.toURL()}
-                  style={styles.stream} />
+                  streamURL={localStream.toURL()}
+                  style={styles.localStream} />
               }
           </View>
           </View>
@@ -104,7 +104,20 @@ const styles = StyleSheet.create({
     screenTitle: {
         fontSize: 24,
         fontWeight: 'bold',
+
     },
+    localStream: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 150, // Adjust width as needed
+        height: 200, // Adjust height as needed
+        borderWidth: 1,
+        borderColor: 'white', // Example border color
+
+
+
+      },
     roleText: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -114,28 +127,35 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 300,
+
     },
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         margin: 7,
+
     },
     body: {
-        flex: 1
+        flex: 1,
+
     },
     stream: {
-        flex: 1
+        flex: 1,
+
     },
     errorText: {
         color: 'orange',
         fontSize: 20,
         position: 'absolute',
         top: 30,
+        right: 90,
         textAlign: 'center',
+
     },
     background: {
         width: "100%",
-        height: "100%"
+        height: "100%",
+        zIndex: 1,
     }
 
 });

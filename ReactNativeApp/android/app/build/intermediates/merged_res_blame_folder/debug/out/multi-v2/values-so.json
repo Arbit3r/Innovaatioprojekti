@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.reactnativeapp-mergeDebugResources-26:/values-so/values-so.xml",
+            "outputFile": "com.reactnativeapp-mergeDebugResources-39:/values-so/values-so.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Jami\\.gradle\\caches\\transforms-3\\b4db2f23f2ab214a51186ce21dfe946e\\transformed\\jetified-react-android-0.73.4-debug\\res\\values-so\\values-so.xml",
+                    "source": "C:\\Users\\nikoa\\.gradle\\caches\\transforms-3\\b4db2f23f2ab214a51186ce21dfe946e\\transformed\\jetified-react-android-0.73.4-debug\\res\\values-so\\values-so.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7",
                         "startColumns": "4,4,4,4,4,4",
