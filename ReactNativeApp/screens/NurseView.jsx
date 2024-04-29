@@ -75,7 +75,7 @@ const NurseView = ({roomCode}) => {
   return (
     <View style={[styles.background, { backgroundColor: isDarkMode ? '#262626' : '#fff' }]}>
     <View style={styles.container}>
-      <View>
+      <View style={styles.logoContainer}>
           <Pressable delayLongPress={3000} onLongPress={() => {
             closeConnection()
             navigation.navigate('RoomNumber')
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginBottom: 20,
-
+    
     // Adjust this value to position the Call button vertically
   },
   localStreamContainer: {
@@ -195,7 +195,11 @@ const styles = StyleSheet.create({
   background: {
     width: "100%",
     height: "100%"
+  },
+  logoContainer: {
+    padding: 5
   }
+
 });
 
 export default NurseView;
