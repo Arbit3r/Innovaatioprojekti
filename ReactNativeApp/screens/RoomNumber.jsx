@@ -73,12 +73,14 @@ const RoomNumber = () => {
     const handleInput = () => {
         if (roomNumber.trim().length === 0) {
             ToastAndroid.show(t("room_number_empty"), ToastAndroid.SHORT);
+        } else if (ipAddress.trim().length === 0) {
+            ToastAndroid.show(t("ipAddress_empty"), ToastAndroid.SHORT); // Show a toast message for empty IP address
         } else {
             saveDataToMemory();
             navigation.replace(role === "Resident" ? 'Main' : 'NurseView');
         }
     }
-
+    
     return ( 
         <View style={[styles.background, { backgroundColor: isDarkMode ? '#262626' : '#fff' }]}>
             <Text style={styles.screenTitle}>{t("screen_title")}</Text>
