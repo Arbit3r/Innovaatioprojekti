@@ -10,19 +10,19 @@ const useConnection = (isRoom) => {
   const [roomCode, setRoomCode] = useState(null);
   const [peerConnection, setPeerConnection] = useState(null);
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
+  const [remoteMediaStreamBuffer, setRemoteMediaStreamBuffer] = useState(new MediaStream());
   const [serverAddress, setServerAddress] = useState(null);
 
   const [connectionState, _setConnectionState] = useState('not started');
   const connectionStateRef = useRef(connectionState); // React states cannot be used inside event listeners, this Ref will be used inside those instead
   // Whenever connectionState is updated, update the Ref as well
   const setConnectionState = data => {
-    connectionStateRef.current = data;
     _setConnectionState(data)
+    connectionStateRef.current = data;
   }
-  const [ws, setupSignalingServer] = useSignalingServer(isRoom, setConnectionState);
 
+  const [ws, connectToServer] = useSignalingServer(isRoom, setConnectionState);
   const localMediaStream = useMediaStream();
-  const [remoteMediaStreamBuffer, setRemoteMediaStreamBuffer] = useState(null);
 
   let peerConstraints = {
     iceServers: [
@@ -37,30 +37,26 @@ const useConnection = (isRoom) => {
   }, [connectionState])
 
   function startConnection(roomCode_, serverAddress_) {
-    setConnectionState('starting');
-    setRemoteMediaStream(null);
-    setRemoteMediaStreamBuffer(new MediaStream());
+    setConnectionState('setting up');
+    setPeerConnection(new RTCPeerConnection(peerConstraints));
     setRoomCode(roomCode_);
     setServerAddress(serverAddress_);
   }
 
+  // Runs after all the assignments in startConnection() are complete
   useEffect(() => {
-    if (connectionState !== 'starting' || !roomCode || !serverAddress || !remoteMediaStreamBuffer || remoteMediaStream) return;
-    setPeerConnection(new RTCPeerConnection(peerConstraints));
-  }, [roomCode, serverAddress, connectionState, remoteMediaStreamBuffer, remoteMediaStream])
+    if (connectionState !== 'setting up' || !peerConnection || !serverAddress || !roomCode) return;
+    connectToServer(serverAddress, peerConnection, roomCode);
+  }, [connectionState, peerConnection, serverAddress, roomCode])
 
+  // Runs after server connection is complete and the localMediaStream has been created
   useEffect(() => {
-    if (connectionState !== 'starting' || !peerConnection) return;
-    setupSignalingServer(serverAddress, peerConnection, roomCode);
-  }, [peerConnection, connectionState])
-
-  useEffect(() => {
-    if (connectionState !== 'connected' || !localMediaStream || !ws || !peerConnection) return;
+    if (connectionState !== 'connected' || !localMediaStream) return;
     setupPeerConnection();
-    //setConnectionState('connected');
-  }, [localMediaStream, ws, peerConnection, connectionState])
+  }, [connectionState, localMediaStream])
 
   function closeConnection() {
+    setConnectionState('closed');
     closeWebSocket();
     closePeerConnection();
   }
@@ -76,11 +72,6 @@ const useConnection = (isRoom) => {
     peerConnection.close();
     setPeerConnection(null);
   }
-
-  /*useEffect(() => {
-    if (connectionState !== 'restarting' || peerConnection || ws) return;
-    startConnection(roomCode, serverAddress);
-  }, [connectionState, peerConnection, ws]);*/
 
   function setupPeerConnection() {
     peerConnection.addEventListener('connectionstatechange', event => {handleConnectionStateChange(event)});
@@ -127,7 +118,6 @@ const useConnection = (isRoom) => {
     } catch (e) {
       console.log('failed to send candidate: ' + e);
     }
-
   }
 
   function handleIceCandidateError(event) {
@@ -141,7 +131,6 @@ const useConnection = (isRoom) => {
         break;
       case 'completed':
         console.log('ICE connection state: completed');
-        //if (!isRoom) ws.close(1000, 'Connected to room');
         break;
     }
   }
@@ -161,35 +150,6 @@ const useConnection = (isRoom) => {
     } catch (e) {
       console.log('error while sending call request: ' + e);
     }
-
-    /*try {
-      makingOffer = true;
-
-      let sessionConstraints = {
-        mandatory: {
-          OfferToReceiveAudio: true,
-          OfferToReceiveVideo: true,
-          VoiceActivityDetection: true,
-        },
-      };
-
-      const offerDescription = await peerConnection.createOffer(sessionConstraints);
-      await peerConnection.setLocalDescription(offerDescription);
-
-      const offer = {
-        type: 'offer',
-        roomCode: roomCode,
-        isRoom: !isRoom,
-        description: peerConnection.localDescription,
-      };
-
-      ws.send(JSON.stringify(offer));
-      console.log('offer sent, isRoom: ' + isRoom);
-    } catch (e) {
-      console.log('Error while sending offer:' + e);
-    } finally {
-      makingOffer = false;
-    }*/
   }
 
   function handleSignalingStateChange(event) {

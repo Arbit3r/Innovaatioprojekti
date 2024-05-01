@@ -8,7 +8,7 @@ const useSignalingServer = (isRoom, setConnectionState) => {
   let remoteCandidates = useRef([]).current;
   let makingOffer = useRef(false).current;
 
-  function setupSignalingServer(serverAddress, _peerConnection, _roomCode) {
+  function connectToServer(serverAddress, _peerConnection, _roomCode) {
     setWs(new WebSocket(serverAddress));
     setPeerConnection(_peerConnection);
     setRoomCode(_roomCode);
@@ -26,8 +26,11 @@ const useSignalingServer = (isRoom, setConnectionState) => {
       message = JSON.parse(message.data);
 
       switch (message.type) {
+        case 'registration denied':
+          setConnectionState('room already exists');
+          break;
+
         case 'request accepted':
-          console.log('request accepted')
           setConnectionState('in call');
           await sendOffer();
           break;
@@ -48,6 +51,10 @@ const useSignalingServer = (isRoom, setConnectionState) => {
 
         case 'candidate':
           handleRemoteCandidate(message.candidate);
+          break;
+
+        case 'peer disconnected':
+          setConnectionState('restarting');
           break;
 
         default:
@@ -188,7 +195,7 @@ const useSignalingServer = (isRoom, setConnectionState) => {
     remoteCandidates = [];
   }
 
-  return [ ws, setupSignalingServer ];
+  return [ ws, connectToServer ];
 }
 
 export default useSignalingServer;
