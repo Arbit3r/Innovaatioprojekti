@@ -104,14 +104,16 @@ const NurseView = ({roomCode}) => {
           </View>
         )}
       </View>
-      <View style={styles.localStreamContainer}>
-        {localStream && (
-          <RTCView
-            style={styles.localStream}
-            streamURL={localStream.toURL()}
-          />
-        )}
-      </View>
+     <View style={styles.localStreamContainer}>
+       <View style={styles.localStreamWrapper}>
+         {localStream && (
+           <RTCView
+             style={styles.localStream}
+             streamURL={localStream.toURL()}
+           />
+         )}
+       </View>
+       </View>
       <View style={styles.buttonContainer}>
         <Button
           title={t("disconnect_button")}
@@ -168,12 +170,17 @@ const styles = StyleSheet.create({
   localStreamContainer: {
     position: 'absolute',
     bottom: 60,
-    right: -5, // Adjust this value to position the local stream container horizontally
-    width: 120,
+    right: 15,
+    width: 92,
     height: 160,
-    borderRadius: 8,
     overflow: 'hidden',
-    elevation: 5, // Add elevation to ensure it's displayed on top
+    elevation: 5,
+  },
+  localStreamWrapper: {
+    borderRadius: 20, // Adjust the value as needed
+     overflow: 'hidden',
+      borderWidth: 2, // Adjust the border width as needed
+      borderColor: '#660EDE',
   },
   localStream: {
     width: '100%',

@@ -89,22 +89,44 @@ const Main = () => {
               {connectionState === 'server connection failed' && (
                 <Text style={styles.errorText}>⚠️ Connection failed</Text>
               )}
-              { remoteStream &&
-                <RTCView
-                  streamURL={remoteStream.toURL()}
-                  style={styles.stream} />
-              }
-          </View>
-          </View>
-      </>
-    );
-}
+                    {localStream && (
+                      <View style={styles.localStreamWrapper}>
+                        <RTCView
+                          streamURL={localStream.toURL()}
+                          style={styles.localStream}
+                        />
+                      </View>
+                          )}
+                      </View>
+                  </View>
+                  </>
+                );
+            }
 
 const styles = StyleSheet.create({
     screenTitle: {
         fontSize: 24,
         fontWeight: 'bold',
+
     },
+    localStreamWrapper: {
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            borderRadius: 20, // Adjust the value as needed
+            overflow: 'hidden',
+            borderWidth: 2, // Adjust the border width as needed
+            borderColor: 'white', // Set the border color
+            borderColor: '#660EDE',
+            height: 160,
+            width: 92,
+            left: 255,
+        },
+        localStream: {
+            width: '100%',
+            height: '100%',
+        },
+
     roleText: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -114,28 +136,35 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 300,
+
     },
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         margin: 7,
+
     },
     body: {
-        flex: 1
+        flex: 1,
+
     },
     stream: {
-        flex: 1
+        flex: 1,
+
     },
     errorText: {
         color: 'orange',
         fontSize: 20,
         position: 'absolute',
         top: 30,
+        right: 90,
         textAlign: 'center',
+
     },
     background: {
         width: "100%",
-        height: "100%"
+        height: "100%",
+        zIndex: 1,
     }
 
 });
