@@ -55,6 +55,13 @@ const useConnection = (isRoom) => {
     setupPeerConnection();
   }, [connectionState, localMediaStream])
 
+  function toggleRemoteVideo() {
+    if (!localMediaStream || !remoteMediaStream) return;
+
+    let videoTrack = remoteMediaStream.getVideoTracks()[0];
+    videoTrack.enabled = !videoTrack.enabled;
+  }
+
   function closeConnection() {
     setConnectionState('closed');
     closeWebSocket();
@@ -170,7 +177,7 @@ const useConnection = (isRoom) => {
     }
   }
 
-  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection ];
+  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection, toggleRemoteVideo ];
 }
 
 export default useConnection;

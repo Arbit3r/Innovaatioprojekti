@@ -10,15 +10,10 @@ const useMediaStream = () => {
       facingMode: 'user',
     },
   };
-  let isVoiceOnly = false;
 
   async function setupLocalMediaStream() {
     try {
       const mediaStream = await mediaDevices.getUserMedia(mediaConstraints);
-      if (isVoiceOnly) {
-        let videoTrack = mediaStream.getVideoTracks()[0];
-        videoTrack.enabled = false;
-      }
       setLocalMediaStream(mediaStream);
     } catch (e) {
       console.log(e);
