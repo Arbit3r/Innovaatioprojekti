@@ -11,7 +11,6 @@ const Main = () => {
     const [userData, setUserData] = useState({});
     const { t } = useTranslation();
     const [remoteStream, localStream, connectionState, startConnection, closeConnection] = useConnection(true);
-    const error = false // temporary variable for connection error
 
     const [isDarkMode, setIsDarkMode] = useState(
         Appearance.getColorScheme() === 'dark'
