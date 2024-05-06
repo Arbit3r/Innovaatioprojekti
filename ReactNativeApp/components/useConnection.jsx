@@ -21,7 +21,7 @@ const useConnection = (isRoom) => {
     connectionStateRef.current = data;
   }
 
-  const [ws, connectToServer] = useSignalingServer(isRoom, setConnectionState);
+  const [ws, connectToServer] = useSignalingServer(isRoom, setConnectionState, toggleRemoteVideoTrack);
   const localMediaStream = useMediaStream();
 
   let peerConstraints = {
@@ -55,8 +55,26 @@ const useConnection = (isRoom) => {
     setupPeerConnection();
   }, [connectionState, localMediaStream])
 
-  function toggleRemoteVideo() {
-    if (!localMediaStream || !remoteMediaStream) return;
+  function toggleVideo() {
+    if (!remoteMediaStream) return;
+
+    try {
+      const request = {
+        type: 'toggle video',
+        roomCode: roomCode,
+      }
+
+      ws.send(JSON.stringify(request));
+      console.log('toggle video request sent');
+    } catch(e) {
+      console.log('failed to send toggle video request: ' + e);
+    }
+
+    toggleRemoteVideoTrack();
+  }
+
+  function toggleRemoteVideoTrack() {
+    if (!remoteMediaStream) return;
 
     let videoTrack = remoteMediaStream.getVideoTracks()[0];
     videoTrack.enabled = !videoTrack.enabled;
@@ -177,7 +195,7 @@ const useConnection = (isRoom) => {
     }
   }
 
-  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection, toggleRemoteVideo ];
+  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection, toggleVideo ];
 }
 
 export default useConnection;

@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import { RTCSessionDescription, RTCIceCandidate } from "react-native-webrtc";
 
-const useSignalingServer = (isRoom, setConnectionState) => {
+const useSignalingServer = (isRoom, setConnectionState, toggleRemoteVideoTrack) => {
   const [roomCode, setRoomCode] = useState(null);
   const [ws, setWs] = useState(null);
   const [peerConnection, setPeerConnection] = useState(null);
@@ -52,6 +52,10 @@ const useSignalingServer = (isRoom, setConnectionState) => {
         case 'candidate':
           handleRemoteCandidate(message.candidate);
           break;
+
+        case 'toggle video':
+          toggleRemoteVideoTrack();
+          break
 
         case 'peer disconnected':
           setConnectionState('restarting');
