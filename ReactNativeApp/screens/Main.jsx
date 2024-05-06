@@ -86,21 +86,24 @@ const Main = () => {
           </View>
           <View style={styles.body}>
               {connectionState === 'server connection failed' && (
-                <Text style={styles.errorText}>⚠️ Connection failed</Text>
+                <Text style={styles.errorText}>⚠️ Connection failed!</Text>
               )}
-                    {localStream && (
-                      <View style={styles.localStreamWrapper}>
-                        <RTCView
-                          streamURL={localStream.toURL()}
-                          style={styles.localStream}
-                        />
-                      </View>
-                          )}
-                      </View>
-                  </View>
-                  </>
-                );
-            }
+              {connectionState === 'room already exists' && (
+                <Text style={styles.errorText}>⚠️ Room Already Exists!</Text>
+              )}
+              {localStream && (
+                <View style={styles.localStreamWrapper}>
+                <RTCView
+                    streamURL={localStream.toURL()}
+                    style={styles.localStream}
+                />
+                </View>
+              )}
+          </View>
+      </View>
+      </>
+    );
+}
 
 const styles = StyleSheet.create({
     screenTitle: {

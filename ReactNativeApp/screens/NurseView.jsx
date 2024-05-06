@@ -87,7 +87,13 @@ const NurseView = ({roomCode}) => {
           </View>
         )}
         {connectionState === 'server connection failed' && (
-          <Text style={styles.errorText}>⚠️ Connection failed</Text>
+          <Text style={styles.errorText}>⚠️ Connection failed!</Text>
+        )}
+        {connectionState === 'room not found' && (
+          <Text style={styles.errorText}>⚠️ Room Not Found!</Text>
+        )}
+        {connectionState === 'room in use' && (
+          <Text style={styles.errorText}>⚠️ Room In Use!</Text>
         )}
         {remoteStream && (
           <View style={styles.cameraContainer}>
