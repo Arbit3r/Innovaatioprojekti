@@ -83,17 +83,17 @@ const NurseView = ({roomCode}) => {
         {!remoteStream && (
           <View>
             <ActivityIndicator size="large" color="#0000ff" />
-            <Text style={styles.bufferingText}>Loading...</Text>
+            <Text style={styles.bufferingText}>{t("loading")}</Text>
           </View>
         )}
         {connectionState === 'server connection failed' && (
-          <Text style={styles.errorText}>⚠️ Connection failed!</Text>
+          <Text style={styles.errorText}>⚠️ {t("connection_failed")}</Text>
         )}
         {connectionState === 'room not found' && (
-          <Text style={styles.errorText}>⚠️ Room Not Found!</Text>
+          <Text style={styles.errorText}>⚠️ {t("room_not_found")}</Text>
         )}
         {connectionState === 'room in use' && (
-          <Text style={styles.errorText}>⚠️ Room In Use!</Text>
+          <Text style={styles.errorText}>⚠️ {t("room_in_use")}</Text>
         )}
         {remoteStream && (
           <View style={styles.cameraContainer}>

@@ -12,5 +12,10 @@
     "set_ipAdress_label": "Aseta IP-osoite",
     "ipAddress_placeholder": "IP-osoite",
     "ipAddress_empty": "IP-osoite ei voi olla tyhjä!",
-    "disconnect_button": "Katkaise yhteys"
+    "loading": "Ladataan...",
+    "disconnect_button": "Katkaise yhteys",
+    "connection_failed": "Yhteys epäonnistui!",
+    "room_already_exists": "Huone on jo olemassa!",
+    "room_not_found": "Huonetta ei löytynyt!",
+    "room_in_use": "Huone on varattu!"
 }
