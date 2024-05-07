@@ -12,6 +12,7 @@ const useConnection = (isRoom) => {
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
   const [remoteMediaStreamBuffer, setRemoteMediaStreamBuffer] = useState(new MediaStream());
   const [serverAddress, setServerAddress] = useState(null);
+  const [toggleVideo, setToggleVideo] = useState(false);
 
   const [connectionState, _setConnectionState] = useState('not started');
   const connectionStateRef = useRef(connectionState); // React states cannot be used inside event listeners, this Ref will be used inside those instead
@@ -21,7 +22,7 @@ const useConnection = (isRoom) => {
     connectionStateRef.current = data;
   }
 
-  const [ws, connectToServer] = useSignalingServer(isRoom, setConnectionState, toggleRemoteVideoTrack);
+  const [ws, connectToServer] = useSignalingServer(isRoom, setConnectionState, setToggleVideo);
   const localMediaStream = useMediaStream();
 
   let peerConstraints = {
@@ -55,13 +56,14 @@ const useConnection = (isRoom) => {
     setupPeerConnection();
   }, [connectionState, localMediaStream])
 
-  function toggleVideo() {
+  function toggleRemoteVideo() {
     if (!remoteMediaStream) return;
 
     try {
       const request = {
-        type: 'toggle video',
+        type: 'toggleRemoteVideo',
         roomCode: roomCode,
+        isRoom: !isRoom
       }
 
       ws.send(JSON.stringify(request));
@@ -70,15 +72,16 @@ const useConnection = (isRoom) => {
       console.log('failed to send toggle video request: ' + e);
     }
 
-    toggleRemoteVideoTrack();
+    setToggleVideo(true);
   }
 
-  function toggleRemoteVideoTrack() {
-    if (!remoteMediaStream) return;
+  useEffect(() => {
+    if (!remoteMediaStream || !toggleVideo) return;
 
-    let videoTrack = remoteMediaStream.getVideoTracks()[0];
+    let videoTrack = remoteMediaStreamBuffer.getVideoTracks()[0];
     videoTrack.enabled = !videoTrack.enabled;
-  }
+    setToggleVideo(false);
+  }, [toggleVideo]);
 
   function closeConnection() {
     setConnectionState('closed');
@@ -195,7 +198,7 @@ const useConnection = (isRoom) => {
     }
   }
 
-  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection, toggleVideo ];
+  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection, toggleRemoteVideo ];
 }
 
 export default useConnection;
