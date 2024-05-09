@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import { RTCSessionDescription, RTCIceCandidate } from "react-native-webrtc";
 
-const useSignalingServer = (isRoom, setConnectionState, setToggleVideo) => {
+const useSignalingServer = (isRoom, setConnectionState, videoEnabledRef, setVideoEnabled) => {
   const [roomCode, setRoomCode] = useState(null);
   const [ws, setWs] = useState(null);
   const [peerConnection, setPeerConnection] = useState(null);
@@ -18,7 +18,7 @@ const useSignalingServer = (isRoom, setConnectionState, setToggleVideo) => {
     if (!ws || !roomCode) return;
 
     ws.onopen = () => {
-      setConnectionState('connected');
+      setConnectionState('connected to server');
       register();
     };
 
@@ -31,7 +31,7 @@ const useSignalingServer = (isRoom, setConnectionState, setToggleVideo) => {
           break;
 
         case 'request accepted':
-          setConnectionState('in call');
+          setConnectionState('calling');
           await sendOffer();
           break;
 
@@ -40,7 +40,7 @@ const useSignalingServer = (isRoom, setConnectionState, setToggleVideo) => {
           break;
 
         case 'offer':
-          setConnectionState('in call');
+          setConnectionState('calling');
           await receiveOffer(message.description);
           sendAnswer();
           break;
@@ -54,7 +54,7 @@ const useSignalingServer = (isRoom, setConnectionState, setToggleVideo) => {
           break;
 
         case 'toggleVideo':
-          setToggleVideo(true);
+          setVideoEnabled(!videoEnabledRef.current);
           break
 
         case 'peer disconnected':
@@ -98,6 +98,8 @@ const useSignalingServer = (isRoom, setConnectionState, setToggleVideo) => {
 
   async function sendOffer() {
     try {
+      if (makingOffer) return;
+
       makingOffer = true;
 
       let sessionConstraints = {

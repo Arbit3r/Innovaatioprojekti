@@ -22,7 +22,7 @@ const NurseView = ({roomCode}) => {
   const navigation = useNavigation();
 
   const [userData, setUserData] = useState({});
-  const [remoteStream, localStream, connectionState, startConnection, closeConnection, toggleRemoteVideo ] = useConnection(false);
+  const [remoteStream, localStream, connectionState, startConnection, closeConnection, toggleVideo ] = useConnection(false);
 
   const [position, setPosition] = useState({
     x: windowWidth / 2 - 60, // Half the local stream width

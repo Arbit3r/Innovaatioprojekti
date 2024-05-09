@@ -12,17 +12,23 @@ const useConnection = (isRoom) => {
   const [remoteMediaStream, setRemoteMediaStream] = useState(null);
   const [remoteMediaStreamBuffer, setRemoteMediaStreamBuffer] = useState(new MediaStream());
   const [serverAddress, setServerAddress] = useState(null);
-  const [toggleVideo, setToggleVideo] = useState(false);
 
-  const [connectionState, _setConnectionState] = useState('not started');
-  const connectionStateRef = useRef(connectionState); // React states cannot be used inside event listeners, this Ref will be used inside those instead
+  const [connectionState, _setConnectionState] = useState();
+  const connectionStateRef = useRef(connectionState); // React states can't be read properly inside of event listeners, this ref will be used instead
   // Whenever connectionState is updated, update the Ref as well
   const setConnectionState = data => {
-    _setConnectionState(data)
+    _setConnectionState(data);
     connectionStateRef.current = data;
   }
 
-  const [ws, connectToServer] = useSignalingServer(isRoom, setConnectionState, setToggleVideo);
+  const [videoEnabled, _setVideoEnabled] = useState(true);
+  const videoEnabledRef = useRef(true);
+  const setVideoEnabled = data => {
+    _setVideoEnabled(data);
+    videoEnabledRef.current = data;
+  }
+
+  const [ws, connectToServer] = useSignalingServer(isRoom, setConnectionState, videoEnabledRef, setVideoEnabled);
   const localMediaStream = useMediaStream();
 
   let peerConstraints = {
@@ -34,7 +40,7 @@ const useConnection = (isRoom) => {
   }
 
   useEffect(() => {
-    console.log('connection state variable: ' + connectionState + ', isRoom: ' + isRoom);
+    console.log('connection state variable: ' + connectionState);
   }, [connectionState])
 
   function startConnection(roomCode_, serverAddress_) {
@@ -52,11 +58,11 @@ const useConnection = (isRoom) => {
 
   // Runs after server connection is complete and the localMediaStream has been created
   useEffect(() => {
-    if (connectionState !== 'connected' || !localMediaStream) return;
+    if (connectionState !== 'connected to server' || !localMediaStream) return;
     setupPeerConnection();
   }, [connectionState, localMediaStream])
 
-  function toggleRemoteVideo() {
+  function toggleVideo() {
     if (!remoteMediaStream) return;
 
     try {
@@ -72,16 +78,15 @@ const useConnection = (isRoom) => {
       console.log('failed to send toggle video request: ' + e);
     }
 
-    setToggleVideo(true);
+    setVideoEnabled(!videoEnabled)
   }
 
   useEffect(() => {
-    if (!remoteMediaStream || !toggleVideo) return;
+    if (!remoteMediaStream) return;
 
     let videoTrack = remoteMediaStreamBuffer.getVideoTracks()[0];
-    videoTrack.enabled = !videoTrack.enabled;
-    setToggleVideo(false);
-  }, [toggleVideo]);
+    videoTrack.enabled = videoEnabled;
+  }, [videoEnabled]);
 
   function closeConnection() {
     setConnectionState('closed');
@@ -96,7 +101,7 @@ const useConnection = (isRoom) => {
 
   function closePeerConnection() {
     if (!peerConnection) return;
-    console.log('closePeerConnection function called');
+
     peerConnection.close();
     setPeerConnection(null);
   }
@@ -118,14 +123,11 @@ const useConnection = (isRoom) => {
 
   function handleConnectionStateChange() {
     console.log('Connection state changed: ' + peerConnection.connectionState + ', isRoom: ' + isRoom);
-    if (connectionStateRef.current === 'in call' &&
-      (peerConnection.connectionState === 'closed' ||
-      peerConnection.connectionState === 'disconnected' ||
-      peerConnection.connectionState === 'failed')) {
-      if (!isRoom) return;
+    if (!isRoom) return;
+    if (peerConnection.connectionState !== 'closed' && peerConnection.connectionState !== 'disconnected' && peerConnection.connectionState !== 'failed') return;
+    if (connectionStateRef.current !== 'calling' && connectionStateRef.current !== 'in call') return;
 
-      setConnectionState('restarting');
-    }
+    setConnectionState('restarting');
   }
 
   function handleIceCandidate(event) {
@@ -156,6 +158,7 @@ const useConnection = (isRoom) => {
     switch (peerConnection.iceConnectionState) {
       case 'connected':
         console.log('ICE connection state: connected');
+        setConnectionState('in call');
         break;
       case 'completed':
         console.log('ICE connection state: completed');
@@ -198,7 +201,7 @@ const useConnection = (isRoom) => {
     }
   }
 
-  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection, toggleRemoteVideo ];
+  return [ remoteMediaStream, localMediaStream, connectionState, startConnection, closeConnection, toggleVideo ];
 }
 
 export default useConnection;
