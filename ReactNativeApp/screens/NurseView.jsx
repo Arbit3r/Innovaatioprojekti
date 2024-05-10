@@ -8,7 +8,8 @@ import {
   Pressable,
   ActivityIndicator,
   Image,
-  Appearance
+  Appearance,
+  Linking
 } from 'react-native';
 import { RTCView } from 'react-native-webrtc';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
@@ -56,6 +57,7 @@ const NurseView = ({roomCode}) => {
   const handleDisconnect = () => {
     // Your implementation to initiate a call to the customer
     closeConnection();
+    Linking.openURL('senderapp://open');
   }
 
   useEffect(() => {
