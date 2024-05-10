@@ -86,7 +86,7 @@ const Main = () => {
           </View>
           <View style={styles.body}>
               {connectionState === 'server connection failed' && (
-                <Text style={styles.errorText}>⚠️ {t("connection_failed")}</Text>
+                <Text style={styles.errorText}>⚠️ {t("server_connection_failed")}</Text>
               )}
               {connectionState === 'room already exists' && (
                 <Text style={styles.errorText}>⚠️ {t("room_already_exists")}</Text>

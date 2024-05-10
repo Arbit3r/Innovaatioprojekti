@@ -12,9 +12,9 @@
     "set_ipAdress_label": "Set IP Address",
     "ipAddress_placeholder": "IP Address",
     "ipAddress_empty": "IP address cannot be empty!",
-    "loading": "Loading...",
+    "calling": "Calling..",
     "disconnect_button": "Disconnect",
-    "connection_failed": "Connection Failed!",
+    "server_connection_failed": "Server Connection Failed!",
     "room_already_exists": "Room Already Exists!",
     "room_not_found": "Room Not Found!",
     "room_in_use": "Room In Use!"
