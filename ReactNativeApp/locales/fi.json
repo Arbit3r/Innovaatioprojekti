@@ -17,5 +17,6 @@
     "server_connection_failed": "Palvelinyhteys epäonnistui!",
     "room_already_exists": "Huone on jo olemassa!",
     "room_not_found": "Huonetta ei löytynyt!",
-    "room_in_use": "Huone on varattu!"
+    "room_in_use": "Huone on varattu!",
+    "connection_closed": "Puhelu päättyi"
 }

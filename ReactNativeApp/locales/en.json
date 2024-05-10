@@ -17,5 +17,6 @@
     "server_connection_failed": "Server Connection Failed!",
     "room_already_exists": "Room Already Exists!",
     "room_not_found": "Room Not Found!",
-    "room_in_use": "Room In Use!"
+    "room_in_use": "Room In Use!",
+    "connection_closed": "Call ended"
 }

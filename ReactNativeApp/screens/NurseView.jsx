@@ -107,6 +107,9 @@ const NurseView = ({roomCode}) => {
             )}
           </View>
         )}
+        {connectionState === 'closed' && (
+          <Text style={styles.connectionClosedText}>{t("connection_closed")}</Text>
+        )}
       </View>
      <View style={styles.localStreamContainer}>
        <View style={styles.localStreamWrapper}>
@@ -117,7 +120,7 @@ const NurseView = ({roomCode}) => {
            />
          )}
        </View>
-       </View>
+      </View>
       <View style={styles.buttonContainer}>
         <Button
           title={t("disconnect_button")}
@@ -210,6 +213,12 @@ const styles = StyleSheet.create({
   logoContainer: {
     padding: 8,
     left: -150,  
+  },
+  connectionClosedText: {
+    color: 'red',
+    fontSize: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 
 });
