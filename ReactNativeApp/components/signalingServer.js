@@ -1,10 +1,11 @@
 const { WebSocketServer } = require('ws');
+let port = process.env.SIGNAL_PORT; //Change this to port of choice, if environment key is not set!
 
-const wss = new WebSocketServer({port: 8080 });
+console.log("Starting server on port: " + port);
+const wss = new WebSocketServer({port: port});
 
 const room = new Map();
 const nurse = new Map();
-
 
 // Used to search websocket from two available maps.
 function  handelConn(json) {
@@ -31,143 +32,154 @@ function  handelConn(json) {
     return response;
 }
 
+
 wss.on('connection', ws => {
 
     console.log("New connection!");
-
     let storageRoomNum,isRoom; // These are being stored into during registration event and used in websocket info deletion.
-
 
     //Handle incoming message events from sockets
     ws.on('message', data => {
 
+
+
         let json = JSON.parse(data.toString());
         let roomCheck = json.isRoom && JSON.parse(json.isRoom);
 
-        switch (json.type){
+        if (json.roomCode && json.type && json.isRoom != null){
+
+            switch (json.type){
 
                 //Make a call by searching with (roomCode) and if found send offer(sdp) to remote peer
-            case "offer":
+                case "offer":
 
-                console.log("Calling to " + json.roomCode + "!");
+                    console.log("Calling to " + json.roomCode + "!");
 
-                try {
-                    handelConn(json).send(JSON.stringify(json));
-                    let inCall = room.get(json.roomCode);
-                    inCall = {
-                        websocket : inCall.websocket,
-                        inCall : true
-                    };
-                    room.set(json.roomCode,inCall);
-                    console.log("Calling success!");
-                }catch (e) {
-                    console.log("Calling failed! (socket not found)");
-                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
-                }
+                    try {
+                        handelConn(json).send(JSON.stringify(json));
+                        let inCall = room.get(json.roomCode);
+                        inCall = {
+                            websocket : inCall.websocket,
+                            inCall : true
+                        };
+                        room.set(json.roomCode,inCall);
+                        console.log("Calling success!");
+                    }catch (e) {
+                        console.log("Calling failed! (socket not found)");
+                        ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
+                    }
 
-                break;
+                    break;
 
                 //Answer by searching caller and sending answer(sdp) back to the caller
-            case "answer":
+                case "answer":
 
-                console.log("Answering to " + json.roomCode + " call!");
+                    console.log("Answering to " + json.roomCode + " call!");
 
-                try {
-                    handelConn(json).send(JSON.stringify(json));
-                    console.log("Answer success!");
-                }catch (e) {
-                    console.log("Answer failed! Socket could not be connected to!");
-                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
-                }
-                break;
+                    try {
+                        handelConn(json).send(JSON.stringify(json));
+                        console.log("Answer success!");
+                    }catch (e) {
+                        console.log("Answer failed! Socket could not be connected to!");
+                        ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
+                    }
+                    break;
 
                 //Register websocket to corresponding map with roomCode to the signaling server.
                 //So it could be found by other socket. (P2P availability).
-            case "register":
+                case "register":
 
-                //Check if websocket is already found in one of the maps.
-                if(handelConn(json) == null){
 
-                    //socket was not found. adding to server.
-                    if(roomCheck === true){
-                        storageRoomNum = json.roomCode;
-                        isRoom = true;
-                        room.set(json.roomCode,{
-                            websocket : ws,
-                            inCall : false
-                        });
-                        console.log("Pushing " + json.roomCode + " to room array!");
+                    //Check if websocket is already found in one of the maps.
+                    if(handelConn(json) == null){
 
-                    } else if(roomCheck === false){
-                        storageRoomNum = json.roomCode;
-                        isRoom = false;
-                        nurse.set(json.roomCode,{
-                            websocket : ws,
-                            inCall : false
-                        });
-                        console.log("Pushing " + json.roomCode + " to nurse array!")
-                    }
-                    //Socket was found
-                }else {
-                    ws.send({type: "registration denied"})
-                };
-                break;
+                        //socket was not found. adding to server.
+                        if(roomCheck === true){
+                            storageRoomNum = json.roomCode;
+                            isRoom = true;
+                            room.set(json.roomCode,{
+                                websocket : ws,
+                                inCall : false
+                            });
+                            console.log("Pushing " + json.roomCode + " to room array!");
+
+                        } else if(roomCheck === false){
+                            storageRoomNum = json.roomCode;
+                            isRoom = false;
+                            nurse.set(json.roomCode,{
+                                websocket : ws,
+                                inCall : false
+                            });
+                            console.log("Pushing " + json.roomCode + " to nurse array!")
+                        }
+                        //Socket was found
+                    }else {
+                        console.log("Registration denied!")
+                        ws.send(JSON.stringify({type: "registration denied"}))
+                    };
+                    break;
 
                 //Send possible servers to remote peer.
-            case "candidate":
+                case "candidate":
 
-                console.log("Sending candidate to " + json.roomCode);
-                try {
-                    handelConn(json).send(JSON.stringify(json));
-                }catch (e) {
-                    console.log("Socket could not be connected to!");
-                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
-                }
-                break;
+                    console.log("Sending candidate to " + json.roomCode);
+                    try {
+                        handelConn(json).send(JSON.stringify(json));
+                    }catch (e) {
+                        console.log("Socket could not be connected to!");
+                        ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
+                    }
+                    break;
 
                 //Checking if searched roomCode is in call!
-            case "call request":
+                case "call request":
 
-                console.log("Call request! " + json.roomCode + " " + json.isRoom);
-                let inCall = false;
+                    console.log("Call request! " + json.roomCode + " " + json.isRoom);
+                    let inCall = false;
 
-                try {
-                    if(roomCheck){
-                        inCall = room.get(json.roomCode);
-                    } else if(!roomCheck){
-                        inCall = nurse.get(json.roomCode);
+                    try {
+                        if(roomCheck){
+                            inCall = room.get(json.roomCode);
+                        } else if(!roomCheck){
+                            inCall = nurse.get(json.roomCode);
+                        }
+                        inCall = inCall.inCall;
+
+                        if(inCall){
+                            console.log("Call denied!");
+                            ws.send(JSON.stringify({type: "request denied", reason: "room in use"}));
+                        }else if(!inCall){
+                            console.log("Call accepted!");
+                            ws.send(JSON.stringify({type: "request accepted"}));
+                        }
+
+                    }catch (e) {
+                        console.log("Room in use/not found!");
+                        ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
                     }
-                    inCall = inCall.inCall;
-
-                    if(inCall){
-                        console.log("Call denied!");
-                        ws.send(JSON.stringify({type: "request denied", reason: "room in use"}));
-                    }else if(!inCall){
-                        console.log("Call accepted!");
-                        ws.send(JSON.stringify({type: "request accepted"}));
-                    }
-
-                }catch (e) {
-                    console.log("Room in use/not found!");
-                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
-                }
-                break;
+                    break;
 
                 // Toggle remote video on remote peer
-            case "toggleRemoteVideo":
+                case "toggleRemoteVideo":
 
-                console.log("Toggle video on " + json.roomCode);
+                    console.log("Toggle video on " + json.roomCode);
 
-                try {
-                    handelConn(json).send(JSON.stringify({type: "toggleVideo"}));
-                    console.log("Toggling success!");
-                }catch (e) {
-                    console.log("Toggle failed! Socket could not be connected to!");
-                    ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
-                }
-                break;
+                    try {
+                        handelConn(json).send(JSON.stringify({type: "toggleVideo"}));
+                        console.log("Toggling success!");
+                    }catch (e) {
+                        console.log("Toggle failed! Socket could not be connected to!");
+                        ws.send(JSON.stringify({type: 'request denied', reason: 'room not found'}));
+                    }
+                    break;
+            }
+        } else {
+            console.log("Invalid request!");
+            ws.send(JSON.stringify({type: 'request denied', reason: 'Invalid request'}));
         }
     });
+
+
 
     // Handling disconnection by removing peer from nurse/room maps.
     // Thus making it impossible to be connected to.
