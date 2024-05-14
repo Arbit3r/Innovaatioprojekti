@@ -14,6 +14,7 @@ If you get a "Filename too long" error, open Git Bash as administrator and run: 
 ## How to use
 
 ****
+![App Screenshot](https://raw.githubusercontent.com/Arbit3r/Innovaatioprojekti/main/Documentation/room.jpg)
 ### Asukkaan päänäkymä
 1. Painamalla Benete-logoa 3 sekuntia, avautuu valikko asetuksille
 2. Rooli (Muutettavissa asetuksissa)
@@ -29,6 +30,8 @@ If you get a "Filename too long" error, open Git Bash as administrator and run: 
 5. (Jos yhteys ei avaudu) Jos hoitajan sekä asukkaan välinen yhteys epäonnistuu, ilmestyy näytölle oranssilla tekstillä ilmoitus, mikä kertoo yhteyden epäonnistuneen.
 
 ****
+![App Screenshot](https://raw.githubusercontent.com/Arbit3r/Innovaatioprojekti/main/Documentation/settings.jpg)
+
 ### Settings view
 1. Tekstikenttä, jolla määritetään asukkaan huoneen tunnus. Tekstikenttä hyväksyy sekä numeroita että kirjaimia.
 2. Tekstikenttä IP-osoitteelle. IP-osoite tulee kirjoittaa seuraavassa muodossa: ws://192.168.0.1:8080. Tässä esimerkissä 192.168.0.1 on signalointipalvelimen IP-osoite ja 8080 on palvelimen asennuksen aikana asetettu portti. (Lisää)
