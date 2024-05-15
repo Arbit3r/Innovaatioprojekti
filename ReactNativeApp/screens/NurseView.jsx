@@ -60,6 +60,10 @@ const NurseView = ({roomCode}) => {
     Linking.openURL('senderapp://open');
   }
 
+  const handleToggleVideo = () => {
+    toggleVideo(); 
+  }
+
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
       setIsDarkMode(colorScheme === 'dark');
@@ -122,12 +126,20 @@ const NurseView = ({roomCode}) => {
        </View>
       </View>
       <View style={styles.buttonContainer}>
+      <Button
+              title={t("toggle_video_button")} // You can change this text to whatever you want
+              onPress={handleToggleVideo} // Call the handleToggleVideo function
+              style={styles.button}
+            />
+
         <Button
           title={t("disconnect_button")}
           onPress={handleDisconnect}
           color="red"
           style={styles.button}
         />
+
+
       </View>
     </View>
     </View>
@@ -171,6 +183,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginBottom: 20,
+    flexDirection: "row"
     
     // Adjust this value to position the Call button vertically
   },

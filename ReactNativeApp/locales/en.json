@@ -18,5 +18,6 @@
     "room_already_exists": "Room Already Exists!",
     "room_not_found": "Room Not Found!",
     "room_in_use": "Room In Use!",
-    "connection_closed": "Call ended"
+    "connection_closed": "Call ended",
+    "toggle_video_button": "Camera on/off"
 }

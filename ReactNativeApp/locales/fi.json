@@ -18,5 +18,6 @@
     "room_already_exists": "Huone on jo olemassa!",
     "room_not_found": "Huonetta ei löytynyt!",
     "room_in_use": "Huone on varattu!",
-    "connection_closed": "Puhelu päättyi"
+    "connection_closed": "Puhelu päättyi",
+    "toggle_video_button": "Videoyhteys on/off"
 }
