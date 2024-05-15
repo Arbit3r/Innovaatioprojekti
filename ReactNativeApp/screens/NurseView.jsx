@@ -125,22 +125,23 @@ const NurseView = ({roomCode}) => {
          )}
        </View>
       </View>
-      <View style={styles.buttonContainer}>
-      <Button
+      
+      {connectionState === 'server connection failed' && ( // Render buttons only when in call
+          <View style={styles.buttonContainer}>
+            <Button
               title={t("toggle_video_button")} // You can change this text to whatever you want
               onPress={handleToggleVideo} // Call the handleToggleVideo function
               style={styles.button}
             />
-
-        <Button
-          title={t("disconnect_button")}
-          onPress={handleDisconnect}
-          color="red"
-          style={styles.button}
-        />
-
-
-      </View>
+            <Button
+              title={t("disconnect_button")}
+              onPress={handleDisconnect}
+              color="red"
+              style={styles.button}
+            />
+          </View>
+        )}
+    
     </View>
     </View>
   );
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
     marginBottom: 20, // Adjust this value to position the Call button vertically
   },
   buttonContainer: {
-    marginBottom: 20,
+    padding: 5,
     flexDirection: "row"
     
     // Adjust this value to position the Call button vertically
