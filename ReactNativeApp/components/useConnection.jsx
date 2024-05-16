@@ -21,8 +21,8 @@ const useConnection = (isRoom) => {
     connectionStateRef.current = data;
   }
 
-  const [videoEnabled, _setVideoEnabled] = useState(true);
-  const videoEnabledRef = useRef(true);
+  const [videoEnabled, _setVideoEnabled] = useState(false);
+  const videoEnabledRef = useRef(false);
   const setVideoEnabled = data => {
     _setVideoEnabled(data);
     videoEnabledRef.current = data;
@@ -84,7 +84,7 @@ const useConnection = (isRoom) => {
   useEffect(() => {
     if (!remoteMediaStream) return;
 
-    let videoTrack = remoteMediaStreamBuffer.getVideoTracks()[0];
+    let videoTrack = remoteMediaStream.getVideoTracks()[0];
     videoTrack.enabled = videoEnabled;
   }, [videoEnabled]);
 
@@ -188,6 +188,8 @@ const useConnection = (isRoom) => {
     remoteMediaStreamBuffer.addTrack(event.track);
     console.log('Tracks:' + remoteMediaStreamBuffer.getTracks().length + ' isRoom: ' + isRoom);
     if (remoteMediaStreamBuffer.getTracks().length === 2) {
+      let videoTrack = remoteMediaStreamBuffer.getVideoTracks()[0];
+      videoTrack.enabled = false;
       setRemoteMediaStream(remoteMediaStreamBuffer);
     }
   }
