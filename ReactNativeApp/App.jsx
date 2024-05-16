@@ -103,6 +103,8 @@ function App() {
       const initialUrl = await Linking.getInitialURL();
       if (initialUrl) {
         handleDeepLink({ url: initialUrl });
+      } else {
+        setRoomNumberUpdated(true);
       }
     };
 
@@ -142,8 +144,9 @@ function App() {
       }
     };
     
-    checkStoredData();
+
     if (roomNumberUpdated) {
+      checkStoredData();
       setRoomNumberUpdated(false); 
     }
 

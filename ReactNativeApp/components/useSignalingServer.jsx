@@ -111,7 +111,7 @@ const useSignalingServer = (isRoom, setConnectionState, videoEnabledRef, setVide
       };
 
       const offerDescription = await peerConnection.createOffer(sessionConstraints);
-      await peerConnection.setLocalDescription(offerDescription);
+      await peerConnection.setLocalDescription(offerDescription); // ICE-gathering starts here.
 
       const offer = {
         type: 'offer',
@@ -135,7 +135,7 @@ const useSignalingServer = (isRoom, setConnectionState, videoEnabledRef, setVide
       await peerConnection.setRemoteDescription(offerDescription);
 
       const answerDescription = await peerConnection.createAnswer();
-      await peerConnection.setLocalDescription(answerDescription);
+      await peerConnection.setLocalDescription(answerDescription); // ICE-gathering starts here.
 
       processCandidates();
 

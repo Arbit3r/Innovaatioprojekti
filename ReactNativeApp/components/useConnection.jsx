@@ -112,7 +112,6 @@ const useConnection = (isRoom) => {
     peerConnection.addEventListener('icecandidateerror', event => {handleIceCandidateError(event)});
     peerConnection.addEventListener('iceconnectionstatechange', event => {handleIceConnectionStateChange(event)});
     peerConnection.addEventListener('negotiationneeded', async event => {await handleNegotiationNeeded(event)});
-    peerConnection.addEventListener('signalingstatechange', event => {handleSignalingStateChange(event)});
     peerConnection.addEventListener('track', event => {handleTrack(event)});
 
     // Add our stream to the peer connection.
@@ -123,6 +122,7 @@ const useConnection = (isRoom) => {
 
   function handleConnectionStateChange() {
     console.log('Connection state changed: ' + peerConnection.connectionState + ', isRoom: ' + isRoom);
+    // If role is room and the nurse ends the call, restart.
     if (!isRoom) return;
     if (peerConnection.connectionState !== 'closed' && peerConnection.connectionState !== 'disconnected' && peerConnection.connectionState !== 'failed') return;
     if (connectionStateRef.current !== 'calling' && connectionStateRef.current !== 'in call') return;
@@ -158,10 +158,10 @@ const useConnection = (isRoom) => {
     switch (peerConnection.iceConnectionState) {
       case 'connected':
         console.log('ICE connection state: connected');
-        setConnectionState('in call');
         break;
       case 'completed':
         console.log('ICE connection state: completed');
+        setConnectionState('in call');
         break;
     }
   }
@@ -180,15 +180,6 @@ const useConnection = (isRoom) => {
       console.log('call request sent, isRoom: ' + isRoom);
     } catch (e) {
       console.log('error while sending call request: ' + e);
-    }
-  }
-
-  function handleSignalingStateChange(event) {
-    console.log('Signaling state changed: ' + peerConnection.signalingState + ', isRoom: ' + isRoom);
-    switch (peerConnection.signalingState) {
-      case 'closed':
-        // You can handle the call being disconnected here.
-        break;
     }
   }
 
