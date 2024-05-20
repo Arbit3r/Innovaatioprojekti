@@ -75,7 +75,6 @@ const Main = () => {
                       </Pressable>
                       <Text style={styles.screenTitle}>{userData.roomNumber}</Text>
                   </View>
-                  <Text style={styles.roleText}>{getRoleText()}</Text>
               </View>
               <View style={styles.body}>
                   {connectionState === 'server connection failed' && (
@@ -103,69 +102,51 @@ const Main = () => {
 
 const styles = StyleSheet.create({
   screenTitle: {
-      fontSize: 24,
-      fontWeight: 'bold',
-
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 
   remoteStreamWrapper: {
-     flex: 1,
-     justifyContent: 'center',
-     alignItems: 'center',
-     borderRadius: 30,
-  },
-
-  border: {
-     borderWidth: 2,
-     borderColor: '#660EDE',
-     borderRadius: 20, // Adjust the value as needed
-     overflow: 'hidden',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 30,
   },
 
   remoteStream: {
-      width: '120%',
-      height: '100%',
-  },
-
-  roleText: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      textAlign: 'center',
+    width: '120%',
+    height: '100%',
   },
 
   content: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 300,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 300,
   },
 
   container: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      margin: 7,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    margin: 7,
   },
 
   body: {
-      flex: 1,
-  },
-
-  stream: {
-      flex: 1,
+    flex: 1,
   },
 
   errorText: {
-      color: 'orange',
-      fontSize: 20,
-      position: 'absolute',
-      top: 30,
-      right: 90,
-      textAlign: 'center',
+    color: 'orange',
+    fontSize: 20,
+    position: 'absolute',
+    top: 30,
+    right: 90,
+    textAlign: 'center',
   },
 
   background: {
-      width: "100%",
-      height: "100%",
-      zIndex: 1,
+    width: "100%",
+    height: "100%",
+    zIndex: 1,
   }
 });
 
