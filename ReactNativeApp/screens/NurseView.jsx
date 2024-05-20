@@ -55,9 +55,8 @@ const NurseView = ({roomCode}) => {
   }, [userData.roomNumber, userData.ipAddress]);
 
   const handleDisconnect = () => {
-    // Your implementation to initiate a call to the customer
     closeConnection();
-    Linking.openURL('senderapp://open');
+    //Linking.openURL('senderapp://open');
   }
 
   const handleToggleVideo = () => {
@@ -178,25 +177,6 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     flex: 1,
     marginHorizontal: 10,
-  },
-  localStreamContainer: {
-    position: 'absolute',
-    bottom: 60,
-    right: 15,
-    width: 92,
-    height: 160,
-    overflow: 'hidden',
-    elevation: 5,
-  },
-  localStreamWrapper: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#660EDE',
-  },
-  localStream: {
-    width: '100%',
-    height: '100%',
   },
   bufferingText: {
     color: 'white',
