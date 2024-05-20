@@ -103,27 +103,25 @@ const NurseView = ({roomCode}) => {
         )}
         {remoteStream && (
           <View style={styles.cameraContainer}>
-            {remoteStream && (
-              <RTCView
-                style={styles.remoteStream}
-                streamURL={remoteStream.toURL()}
-              />
-            )}
+            <RTCView
+              style={styles.remoteStream}
+              streamURL={remoteStream.toURL()}
+            />
           </View>
         )}
         {connectionState === 'closed' && (
           <Text style={styles.connectionClosedText}>{t("connection_closed")}</Text>
         )}
       </View>
-     <View style={styles.localStreamContainer}>
-       <View style={styles.localStreamWrapper}>
-         {localStream && (
-           <RTCView
-             style={styles.localStream}
-             streamURL={localStream.toURL()}
-           />
-         )}
-       </View>
+      <View style={styles.localStreamContainer}>
+        <View style={styles.localStreamWrapper}>
+          {localStream && (
+            <RTCView
+              style={styles.localStream}
+              streamURL={localStream.toURL()} // Use localStream here for selfie stream
+            />
+          )}
+        </View>
       </View>
       <View style={styles.buttonContainer}>
       <Button
@@ -179,13 +177,17 @@ const styles = StyleSheet.create({
     right: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20, // Adjust this value to position the Call button vertically
+    marginBottom: 20,
   },
   buttonContainer: {
-    marginBottom: 20,
-    flexDirection: "row"
-    
-    // Adjust this value to position the Call button vertically
+    flexDirection: "row",
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 35, // Adjust the horizontal padding as needed
+  },
+  buttonWrapper: {
+    flex: 1,
+    marginHorizontal: 10,
   },
   localStreamContainer: {
     position: 'absolute',
@@ -197,17 +199,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   localStreamWrapper: {
-    borderRadius: 20, // Adjust the value as needed
-     overflow: 'hidden',
-      borderWidth: 2, // Adjust the border width as needed
-      borderColor: '#660EDE',
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#660EDE',
   },
   localStream: {
     width: '100%',
     height: '100%',
-  },
-  button: {
-    borderRadius: 20, // Adjust the value to control the roundness of the corners
   },
   bufferingText: {
     color: 'white',
@@ -225,15 +224,19 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     padding: 8,
-    left: -150,  
+    left: -120,
   },
   connectionClosedText: {
     color: 'red',
     fontSize: 18,
     alignItems: 'center',
     justifyContent: 'center',
-  }
-
+  },
+  button: {
+    borderRadius: 20,
+  },
 });
+
+
 
 export default NurseView;

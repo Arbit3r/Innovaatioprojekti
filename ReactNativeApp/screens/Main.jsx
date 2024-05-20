@@ -53,62 +53,88 @@ const Main = () => {
         };
       }, []);
 
-    // Determine the role text based on the user's role
-    const getRoleText = () => {
-        if (userData.role === 'Resident') {
-            return t('resident');
-        } else if (userData.role === 'Nurse') {
-            return t('nurse');
-        } else {
-            return '';
-        }
-    };
+   // Determine the role text based on the user's role
+   const getRoleText = () => {
+       if (userData.role === 'Nurse') {
+           return t('nurse');
+       } else {
+           return '';
+       }
+   };
 
-    return (
+  return (
       <>
-      <View style={[styles.background, { backgroundColor: isDarkMode ? '#262626' : '#fff' }]}>
-          <View>
-              <View style={styles.container}>
-                  <Pressable delayLongPress={3000} onLongPress={() => {
-                      closeConnection();
-                      navigation.navigate('RoomNumber')
-                  }}>
-                      <Image source={require("../assets/Benete-blue.png")} />
-                  </Pressable>
-                  <Text style={styles.screenTitle}>{userData.roomNumber}</Text>
+          <View style={[styles.background, { backgroundColor: isDarkMode ? '#262626' : '#fff' }]}>
+              <View>
+                  <View style={styles.container}>
+                      <Pressable delayLongPress={3000} onLongPress={() => {
+                          closeConnection();
+                          navigation.navigate('RoomNumber')
+                      }}>
+                          <Image source={require("../assets/Benete-blue.png")} />
+                      </Pressable>
+                      <Text style={styles.screenTitle}>{userData.roomNumber}</Text>
+                  </View>
+                  <Text style={styles.roleText}>{getRoleText()}</Text>
               </View>
+              <View style={styles.body}>
+                  {connectionState === 'server connection failed' && (
+                      <Text style={styles.errorText}>⚠️ {t("server_connection_failed")}</Text>
+                  )}
+                  {connectionState === 'room already exists' && (
+                      <Text style={styles.errorText}>⚠️ {t("room_already_exists")}</Text>
+                  )}
 
-              <Text style={styles.roleText}>{getRoleText()}</Text>
-
-              <View style={styles.content}>
-                  <Text>{t('everything_is_okay')}</Text>
+                     {remoteStream && (
+                         <>
+                             <View style={styles.remoteStreamWrapper}>
+                                 <RTCView
+                                     streamURL={localStream.toURL()} // Display the remote stream here
+                                     style={styles.remoteStream}
+                                 />
+                             </View>
+                         </>
+                     )}
+                  {localStream && (
+                      <View style={styles.localStreamWrapper}>
+                          <RTCView
+                              streamURL={localStream.toURL()}
+                              style={styles.localStream}
+                          />
+                      </View>
+                  )}
               </View>
           </View>
-          <View style={styles.body}>
-              {connectionState === 'server connection failed' && (
-                <Text style={styles.errorText}>⚠️ {t("server_connection_failed")}</Text>
-              )}
-              {connectionState === 'room already exists' && (
-                <Text style={styles.errorText}>⚠️ {t("room_already_exists")}</Text>
-              )}
-              {localStream && (
-                <View style={styles.localStreamWrapper}>
-                <RTCView
-                    streamURL={localStream.toURL()}
-                    style={styles.localStream}
-                />
-                </View>
-              )}
-          </View>
-      </View>
       </>
-    );
+  );
 }
 
 const styles = StyleSheet.create({
     screenTitle: {
         fontSize: 24,
         fontWeight: 'bold',
+
+    },
+   remoteStreamWrapper: {
+       flex: 1,
+       justifyContent: 'center',
+       alignItems: 'center',
+
+   },
+   remoteStream: {
+       width: '100%',
+       height: '100%',
+   },
+   border: {
+       borderWidth: 2,
+       borderColor: '#660EDE',
+       borderRadius: 20, // Adjust the value as needed
+       overflow: 'hidden',
+   },
+
+    remoteStream: {
+        width: '90%',
+        height: '100%',
 
     },
     localStreamWrapper: {
@@ -118,7 +144,7 @@ const styles = StyleSheet.create({
             borderRadius: 20, // Adjust the value as needed
             overflow: 'hidden',
             borderWidth: 2, // Adjust the border width as needed
-            borderColor: 'white', // Set the border color
+
             borderColor: '#660EDE',
             height: 160,
             width: 92,
@@ -127,6 +153,7 @@ const styles = StyleSheet.create({
         localStream: {
             width: '100%',
             height: '100%',
+
         },
 
     roleText: {
@@ -139,15 +166,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 300,
 
+
     },
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         margin: 7,
 
+
+
     },
     body: {
         flex: 1,
+
 
     },
     stream: {
