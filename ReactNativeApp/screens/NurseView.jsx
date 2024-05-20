@@ -113,16 +113,6 @@ const NurseView = ({roomCode}) => {
           <Text style={styles.connectionClosedText}>{t("connection_closed")}</Text>
         )}
       </View>
-      <View style={styles.localStreamContainer}>
-        <View style={styles.localStreamWrapper}>
-          {localStream && (
-            <RTCView
-              style={styles.localStream}
-              streamURL={localStream.toURL()} // Use localStream here for selfie stream
-            />
-          )}
-        </View>
-      </View>
       <View style={styles.buttonContainer}>
       <Button
               title={t("toggle_video_button")} // You can change this text to whatever you want
@@ -224,7 +214,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     padding: 8,
-    left: -120,
+    marginRight: 'auto',
   },
   connectionClosedText: {
     color: 'red',

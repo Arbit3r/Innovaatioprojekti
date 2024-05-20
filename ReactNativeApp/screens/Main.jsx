@@ -95,14 +95,6 @@ const Main = () => {
                              </View>
                          </>
                      )}
-                  {localStream && (
-                      <View style={styles.localStreamWrapper}>
-                          <RTCView
-                              streamURL={localStream.toURL()}
-                              style={styles.localStream}
-                          />
-                      </View>
-                  )}
               </View>
           </View>
       </>
@@ -110,94 +102,71 @@ const Main = () => {
 }
 
 const styles = StyleSheet.create({
-    screenTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
+  screenTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
 
-    },
-   remoteStreamWrapper: {
-       flex: 1,
-       justifyContent: 'center',
-       alignItems: 'center',
-       borderRadius: 30,
+  },
 
-   },
+  remoteStreamWrapper: {
+     flex: 1,
+     justifyContent: 'center',
+     alignItems: 'center',
+     borderRadius: 30,
+  },
 
-   border: {
-       borderWidth: 2,
-       borderColor: '#660EDE',
-       borderRadius: 20, // Adjust the value as needed
-       overflow: 'hidden',
-   },
+  border: {
+     borderWidth: 2,
+     borderColor: '#660EDE',
+     borderRadius: 20, // Adjust the value as needed
+     overflow: 'hidden',
+  },
 
-    remoteStream: {
-        width: '120%',
-        height: '100%',
+  remoteStream: {
+      width: '120%',
+      height: '100%',
+  },
 
-    },
-    localStreamWrapper: {
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            borderRadius: 20, // Adjust the value as needed
-            overflow: 'hidden',
-            borderWidth: 2, // Adjust the border width as needed
+  roleText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      textAlign: 'center',
+  },
 
-            borderColor: '#660EDE',
-            height: 160,
-            width: 92,
-            left: 255,
-        },
-        localStream: {
-            width: '100%',
-            height: '100%',
+  content: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 300,
+  },
 
-        },
+  container: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      margin: 7,
+  },
 
-    roleText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    content: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 300,
+  body: {
+      flex: 1,
+  },
 
+  stream: {
+      flex: 1,
+  },
 
-    },
-    container: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        margin: 7,
+  errorText: {
+      color: 'orange',
+      fontSize: 20,
+      position: 'absolute',
+      top: 30,
+      right: 90,
+      textAlign: 'center',
+  },
 
-
-
-    },
-    body: {
-        flex: 1,
-
-
-    },
-    stream: {
-        flex: 1,
-
-    },
-    errorText: {
-        color: 'orange',
-        fontSize: 20,
-        position: 'absolute',
-        top: 30,
-        right: 90,
-        textAlign: 'center',
-
-    },
-    background: {
-        width: "100%",
-        height: "100%",
-        zIndex: 1,
-    }
-
+  background: {
+      width: "100%",
+      height: "100%",
+      zIndex: 1,
+  }
 });
 
 export default Main;

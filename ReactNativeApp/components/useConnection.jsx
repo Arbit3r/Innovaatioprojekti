@@ -90,6 +90,7 @@ const useConnection = (isRoom) => {
 
   function closeConnection() {
     setConnectionState('closed');
+    setRemoteMediaStream(null);
     closeWebSocket();
     closePeerConnection();
   }
