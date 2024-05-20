@@ -89,7 +89,7 @@ const Main = () => {
                          <>
                              <View style={styles.remoteStreamWrapper}>
                                  <RTCView
-                                     streamURL={localStream.toURL()} // Display the remote stream here
+                                     streamURL={remoteStream.toURL()} // Display the remote stream here
                                      style={styles.remoteStream}
                                  />
                              </View>
@@ -119,12 +119,10 @@ const styles = StyleSheet.create({
        flex: 1,
        justifyContent: 'center',
        alignItems: 'center',
+       borderRadius: 30,
 
    },
-   remoteStream: {
-       width: '100%',
-       height: '100%',
-   },
+
    border: {
        borderWidth: 2,
        borderColor: '#660EDE',
@@ -133,7 +131,7 @@ const styles = StyleSheet.create({
    },
 
     remoteStream: {
-        width: '90%',
+        width: '120%',
         height: '100%',
 
     },
