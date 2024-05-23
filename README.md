@@ -9,7 +9,7 @@
 - [APK creation](#apk-creation)
 -  [Signaling server install using docker](#signaling-server-install-using-docker)
 ## Authors
-- [Riku Koski](https://github.com/Arbit3r) - [JamiHam](https://github.com/JamiHam) - [SylvesterSalo](https://github.com/SylvesterSalo) - [Niko Ala-aho](https://github.com/nikoa-a) - [Perttu Harvala](https://github.com/800010179) - [Niko Ahonen](https://github.com/tyyppi355)
+- [Riku Koski](https://github.com/Arbit3r) - [Jami Hämäläinen](https://github.com/JamiHam) - [Sylvester Salo](https://github.com/SylvesterSalo) - [Niko Ala-aho](https://github.com/nikoa-a) - [Perttu Harvala](https://github.com/800010179) - [Niko Ahonen](https://github.com/tyyppi355)
 
 ## Development environment Installation
 1. Follow the instructions under "React Native CLI Quickstart" [here](https://reactnative.dev/docs/environment-setup) to install Node, JDK, Android Studio, the React Native CLI and create an Android Virtual Device.
