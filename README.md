@@ -21,32 +21,30 @@ If you get a "Filename too long" error, open Git Bash as administrator and run: 
 
 
 ## How to use
-![App Screenshot](https://raw.githubusercontent.com/Arbit3r/Innovaatioprojekti/main/Documentation/room.jpg)
+![App Screenshot](https://raw.githubusercontent.com/Arbit3r/Innovaatioprojekti/main/Documentation/room.png)
 ### Room view
 1. Pressing Benete-logo for 3 seconds opens a menu for settings.
-2. Role (Changeable in the settings).
-3. Residents room id (Changeable in the settings).
-4. Residents video connection in which one can see itself.
-5. (If connection doesn't open up) orange notification will shop up, telling the user connection has failed.
+2. Residents room id (Changeable in the settings).
+3. If the connection fails, an orange notification will shop up, telling the user why the connection failed.
 ****
+
+![App Screenshot](https://raw.githubusercontent.com/Arbit3r/Innovaatioprojekti/main/Documentation/nurse.png)
 ### Nurse view
 1. Pressing Benete-logo for 3 seconds opens a menu for settings.
 2. Video connection to the resident.
 3. Outgoing video connection to resident from nurse.
 4. A button to disconnect nurse from resident (you can disconnect from the settings menu also!).
-5. (If connection doesn't open up) orange notification will shop up, telling the user connection has failed.
+5. If the connection fails, an orange notification will shop up, telling the user why the connection failed.
 
 ****
-![App Screenshot](https://raw.githubusercontent.com/Arbit3r/Innovaatioprojekti/main/Documentation/settings.jpg)
+![App Screenshot](https://raw.githubusercontent.com/Arbit3r/Innovaatioprojekti/main/Documentation/settings.png)
 
 ### Settings view
-1. Text input to configure room/nurse id. The input accepts text and numbers.
-2. Text input for the IP-address. IP-address should be written in the following way: ws://192.168.0.1:8080. In this example 192.168.0.1 is the signalingserver IP-address and 8080 is the port that has been configured during the installation.
+1. Text input to configure the roomcode. The input accepts any string of characters.
+2. Text input for the IP-address. IP-address should be written in the following format: ws://192.168.0.1:8080. In this example 192.168.0.1 is the signaling server IP-address and 8080 is the port that has been configured during the installation.
 3. Role dropdown menu, where you choose the role between room and nurse.
-   - Room: pressing ready opens up room view.
-   - Nurse: pressing ready opens up nurse view and starts the connection to the room specified in the room id text input.
 4. Language dropdown menu, where you choose language of the app.
-5. Ready button opens a room or nurse view depending on the selection made in the role dropdown menu.
+5. Ready button opens a room or nurse view depending on the selection made in the role dropdown menu. If the role is nurse, a call to the room with the configured roomcode will begin automatically.
 
 ## APK creation
 Debug APK-file creation is achieved in the following way:
